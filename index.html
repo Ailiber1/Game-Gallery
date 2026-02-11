@@ -1075,6 +1075,7 @@ function EventToolsSection({ lang }) {
 // === NOTIFICATION Section ===
 function NotifySection({ lang, showToast }) {
   const t = I18N[lang];
+  const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -1095,28 +1096,33 @@ function NotifySection({ lang, showToast }) {
   };
 
   return (
-    <>
-      <SectionDivider title={t.notifyTitle} />
-      <div className="hud-panel">
-        <div className="hud-panel-title">{t.notifyTitle}</div>
-        <div className="hud-panel-sub">{t.notifySub}</div>
-        <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
-          <input className="hud-input" style={{flex:1,minWidth:'200px',marginBottom:0}}
-            type="email" placeholder={t.notifyPlaceholder} value={email}
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
-          <button className="hud-submit" disabled={sending} onClick={handleSubmit}>
-            {t.notifyBtn}
-          </button>
+    <div className="hud-panel dropdown-panel">
+      <button className="dropdown-toggle" onClick={() => { AudioService.playClick(); setOpen(!open); }}>
+        <span className="hud-panel-title" style={{marginBottom:0,paddingBottom:0,borderBottom:'none'}}>{t.notifyTitle}</span>
+        <span className={'dropdown-arrow' + (open ? ' open' : '')}>▼</span>
+      </button>
+      <div className="hud-panel-sub" style={{marginTop:'8px'}}>{t.notifySub}</div>
+      {open && (
+        <div className="dropdown-body">
+          <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+            <input className="hud-input" style={{flex:1,minWidth:'200px',marginBottom:0}}
+              type="email" placeholder={t.notifyPlaceholder} value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+            <button className="hud-submit" disabled={sending} onClick={handleSubmit}>
+              {t.notifyBtn}
+            </button>
+          </div>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 }
 
 // === CONTACT Section ===
 function ContactSection({ lang, showToast }) {
   const t = I18N[lang];
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [msg, setMsg] = useState('');
@@ -1138,13 +1144,20 @@ function ContactSection({ lang, showToast }) {
   };
 
   return (
-    <div className="hud-panel">
-      <div className="hud-panel-title">{t.contactTitle}</div>
-      <div className="hud-panel-sub">{t.contactSub}</div>
-      <input className="hud-input" placeholder={t.contactName} value={name} onChange={e => setName(e.target.value)} />
-      <input className="hud-input" type="email" placeholder={t.contactEmail} value={email} onChange={e => setEmail(e.target.value)} />
-      <textarea className="hud-textarea" placeholder={t.contactMsg} value={msg} onChange={e => setMsg(e.target.value)} />
-      <button className="hud-submit" disabled={sending} onClick={handleSubmit}>{t.contactBtn}</button>
+    <div className="hud-panel dropdown-panel">
+      <button className="dropdown-toggle" onClick={() => { AudioService.playClick(); setOpen(!open); }}>
+        <span className="hud-panel-title" style={{marginBottom:0,paddingBottom:0,borderBottom:'none'}}>{t.contactTitle}</span>
+        <span className={'dropdown-arrow' + (open ? ' open' : '')}>▼</span>
+      </button>
+      <div className="hud-panel-sub" style={{marginTop:'8px'}}>{t.contactSub}</div>
+      {open && (
+        <div className="dropdown-body">
+          <input className="hud-input" placeholder={t.contactName} value={name} onChange={e => setName(e.target.value)} />
+          <input className="hud-input" type="email" placeholder={t.contactEmail} value={email} onChange={e => setEmail(e.target.value)} />
+          <textarea className="hud-textarea" placeholder={t.contactMsg} value={msg} onChange={e => setMsg(e.target.value)} />
+          <button className="hud-submit" disabled={sending} onClick={handleSubmit}>{t.contactBtn}</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1322,14 +1335,10 @@ function App() {
       {/* Event Tools */}
       <EventToolsSection lang={lang} />
 
-      {/* Notification */}
+      {/* Notification / Contact / Request */}
+      <SectionDivider title={lang==='ja' ? '通知・お問い合わせ' : 'NOTIFICATION / CONTACT'} />
       <NotifySection lang={lang} showToast={showToast} />
-
-      {/* Contact */}
-      <SectionDivider title={t.contactTitle} />
       <ContactSection lang={lang} showToast={showToast} />
-
-      {/* Request BOX (dropdown) */}
       <RequestBoxSection lang={lang} showToast={showToast} />
 
       {/* Community */}
