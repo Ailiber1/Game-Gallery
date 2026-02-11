@@ -580,6 +580,16 @@ body {
 }
 .discord-btn:hover { background: #5865F2; color: #fff; box-shadow: 0 0 20px rgba(88,101,242,0.4); }
 
+/* X follow button */
+.x-follow-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border: 1px solid #fff;
+  background: rgba(255,255,255,0.05); color: #fff;
+  font-family: inherit; font-size: 12px; cursor: pointer;
+  letter-spacing: 2px; text-decoration: none; transition: all 0.3s;
+}
+.x-follow-btn:hover { background: #fff; color: #000; box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+
 /* ===== RESPONSIVE: Mobile ===== */
 @media (max-width: 480px) {
   .main-container { padding: 40px 12px 24px; }
@@ -610,6 +620,7 @@ body {
   .hud-input, .hud-textarea, .hud-select { font-size: 14px; padding: 12px; }
   .hud-submit { padding: 12px 24px; font-size: 12px; width: 100%; }
   .discord-btn { width: 100%; justify-content: center; padding: 14px 20px; }
+  .x-follow-btn { width: 100%; justify-content: center; padding: 14px 20px; }
   .modal-panel { padding: 20px; width: 94%; }
   .boot-msg { font-size: 10px; }
   .execute-btn { padding: 12px; font-size: 12px; }
@@ -632,6 +643,7 @@ body {
   .launch-btn { width: 100%; text-align: center; }
   .hud-submit { width: 100%; }
   .discord-btn { width: 100%; justify-content: center; }
+  .x-follow-btn { width: 100%; justify-content: center; }
 }
 
 /* ===== RESPONSIVE: Tablet landscape ===== */
@@ -649,6 +661,8 @@ body {
   .hud-submit:active { background: var(--green); color: #000; }
   .discord-btn:hover { background: rgba(88,101,242,0.1); color: #5865F2; box-shadow: none; }
   .discord-btn:active { background: #5865F2; color: #fff; }
+  .x-follow-btn:hover { background: rgba(255,255,255,0.05); color: #fff; box-shadow: none; }
+  .x-follow-btn:active { background: #fff; color: #000; }
 }
 
 /* Scrollbar */
@@ -774,16 +788,12 @@ const I18N = {
     tournamentDesc: 'リアルタイム対戦トーナメント管理アプリ。ルーレット抽選、ブラケット表示、グループステージ対応。複数デバイスから同時参加可能。',
     launchBtn: '▶ ツールを起動',
     // Notify
-    notifyTitle: '通知設定',
-    notifySub: '新作ゲーム・イベントの通知を受け取る。メールアドレスを登録すると、新作投稿時やイベント開催時にお知らせします。',
-    notifyPlaceholder: 'your@email.com',
-    notifyBtn: '登録する',
-    notifySuccess: '登録完了。通知をお届けします。',
-    notifyError: '登録に失敗しました。',
-    notifyDuplicate: 'このメールアドレスは登録済みです。',
+    notifyTitle: '最新情報',
+    notifySub: '新作ゲームやイベントの最新情報はXで発信しています。フォローしてチェックしてください。',
+    followBtn: 'Xをフォロー',
     // Contact
     contactTitle: 'お問い合わせ',
-    contactSub: 'お問い合わせ・ご相談はこちらから。開発依頼、質問など何でもどうぞ。',
+    contactSub: 'お問い合わせ・ご相談はこちらから。開発依頼、質問など何でもどうぞ。XのDMでも受け付けています。',
     contactName: '名前',
     contactEmail: 'メールアドレス',
     contactMsg: 'お問い合わせ内容',
@@ -828,16 +838,12 @@ const I18N = {
     tournamentDesc: 'Real-time tournament management app. Roulette lottery, bracket display, group stage support. Multi-device simultaneous participation.',
     launchBtn: '▶ LAUNCH TOOL',
     // Notify
-    notifyTitle: 'NOTIFICATION',
-    notifySub: 'Get notified about new games and events. Register your email to receive updates on new releases and event announcements.',
-    notifyPlaceholder: 'your@email.com',
-    notifyBtn: 'SUBSCRIBE',
-    notifySuccess: 'Subscribed. We will notify you.',
-    notifyError: 'Subscription failed.',
-    notifyDuplicate: 'This email is already registered.',
+    notifyTitle: 'UPDATES',
+    notifySub: 'Follow us on X for the latest game releases and event updates.',
+    followBtn: 'Follow on X',
     // Contact
     contactTitle: 'CONTACT',
-    contactSub: 'General inquiries, development requests, questions — anything welcome.',
+    contactSub: 'General inquiries, development requests, questions — anything welcome. You can also reach us via X DM.',
     contactName: 'Name',
     contactEmail: 'Email',
     contactMsg: 'Message',
@@ -1089,48 +1095,30 @@ function EventToolsSection({ lang }) {
 }
 
 // === NOTIFICATION Section ===
-function NotifySection({ lang, showToast }) {
+// === Discord Webhook ===
+const WEBHOOK_URL = 'https://discord.com/api/webhooks/1471134798553677846/Ma8BdPHZN2cj2diJtTHoNFP1Vj7rQfZWjgwQdly5yP9Gk9vSj5nQJbtQtzyOgCL9YKSP';
+const sendWebhook = async (content) => {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content })
+    });
+  } catch(e) { console.warn('Webhook error:', e); }
+};
+
+// === X FOLLOW Section ===
+function NotifySection({ lang }) {
   const t = I18N[lang];
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [sending, setSending] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!email || !email.includes('@')) return;
-    setSending(true);
-    try {
-      const existing = await db.collection('subscribers').where('email', '==', email).get();
-      if (!existing.empty) { showToast(t.notifyDuplicate); setSending(false); return; }
-      await db.collection('subscribers').add({
-        email, subscribed_at: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      AudioService.playMagic();
-      showToast(t.notifySuccess);
-      setEmail('');
-    } catch(e) { showToast(t.notifyError); console.warn(e); }
-    setSending(false);
-  };
-
   return (
-    <div className="hud-panel dropdown-panel">
-      <button className="dropdown-toggle" onClick={() => { AudioService.playClick(); setOpen(!open); }}>
-        <span className="hud-panel-title" style={{marginBottom:0,paddingBottom:0,borderBottom:'none'}}>{t.notifyTitle}</span>
-        <span className={'dropdown-arrow' + (open ? ' open' : '')}>▼</span>
-      </button>
-      <div className="hud-panel-sub" style={{marginTop:'8px'}}>{t.notifySub}</div>
-      {open && (
-        <div className="dropdown-body">
-          <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
-            <input className="hud-input" style={{flex:1,minWidth:'200px',marginBottom:0}}
-              type="email" placeholder={t.notifyPlaceholder} value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
-            <button className="hud-submit" disabled={sending} onClick={handleSubmit}>
-              {t.notifyBtn}
-            </button>
-          </div>
-        </div>
-      )}
+    <div className="hud-panel">
+      <div className="hud-panel-title">{t.notifyTitle}</div>
+      <div className="hud-panel-sub">{t.notifySub}</div>
+      <a className="x-follow-btn" href="https://x.com/ai_liber46141" target="_blank" rel="noopener noreferrer"
+        onClick={() => AudioService.playClick()}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        {t.followBtn}
+      </a>
     </div>
   );
 }
@@ -1152,6 +1140,7 @@ function ContactSection({ lang, showToast }) {
         name: name.trim(), email: email.trim(), message: msg.trim(),
         created_at: firebase.firestore.FieldValue.serverTimestamp()
       });
+      sendWebhook('📩 **お問い合わせ**\n名前：' + name.trim() + '\nメール：' + email.trim() + '\n内容：' + msg.trim());
       AudioService.playMagic();
       showToast(t.contactSuccess);
       setName(''); setEmail(''); setMsg('');
@@ -1197,6 +1186,7 @@ function RequestBoxSection({ lang, showToast }) {
         game_name: game, category: cat, comment: comment.trim(),
         created_at: firebase.firestore.FieldValue.serverTimestamp()
       });
+      sendWebhook('🎮 **リクエストBOX**\nゲーム：' + game + '\nカテゴリ：' + cat + '\nコメント：' + comment.trim());
       AudioService.playMagic();
       showToast(t.requestSuccess);
       setGame(''); setCat(''); setComment('');
@@ -1351,9 +1341,9 @@ function App() {
       {/* Event Tools */}
       <EventToolsSection lang={lang} />
 
-      {/* Notification / Contact / Request */}
-      <SectionDivider title={lang==='ja' ? '通知・お問い合わせ' : 'NOTIFICATION / CONTACT'} />
-      <NotifySection lang={lang} showToast={showToast} />
+      {/* Updates / Contact / Request */}
+      <SectionDivider title={lang==='ja' ? '最新情報・お問い合わせ' : 'UPDATES / CONTACT'} />
+      <NotifySection lang={lang} />
       <ContactSection lang={lang} showToast={showToast} />
       <RequestBoxSection lang={lang} showToast={showToast} />
 
