@@ -719,10 +719,10 @@ const AudioService = {
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
     o.type = 'sine'; o.frequency.setValueAtTime(1200, this.ctx.currentTime);
     o.frequency.linearRampToValueAtTime(1600, this.ctx.currentTime + 0.05);
-    g.gain.setValueAtTime(0.02, this.ctx.currentTime);
-    g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.05);
+    g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.08);
     o.connect(g); g.connect(this.ctx.destination);
-    o.start(); o.stop(this.ctx.currentTime + 0.05);
+    o.start(); o.stop(this.ctx.currentTime + 0.08);
   },
   playClick() {
     this.init(); if (!this.ctx) return;
