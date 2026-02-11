@@ -506,6 +506,9 @@ body {
 }
 .hud-input:focus { border-color: var(--green); box-shadow: 0 0 8px var(--green-20); }
 .hud-input::placeholder { color: rgba(0,255,65,0.25); }
+.hud-input.field-error, .hud-textarea.field-error, .hud-select.field-error { border-color: #ff4444; box-shadow: 0 0 8px rgba(255,68,68,0.2); }
+.field-error-msg { color: #ff4444; font-size: 11px; margin: -4px 0 8px 0; font-family: var(--font); text-shadow: 0 0 6px rgba(255,68,68,0.3); }
+.honeypot-field { position: absolute; left: -9999px; opacity: 0; height: 0; width: 0; pointer-events: none; tabindex: -1; }
 .hud-textarea {
   width: 100%; padding: 10px 12px; margin-bottom: 12px; min-height: 100px;
   background: rgba(0,0,0,0.8); border: 1px solid var(--green-20);
@@ -800,6 +803,10 @@ const I18N = {
     contactBtn: '送信',
     contactSuccess: '送信完了。ありがとうございます。',
     contactError: '送信に失敗しました。',
+    contactErrName: '名前を入力してください。',
+    contactErrEmail: '有効なメールアドレスを入力してください。',
+    contactErrMsg: 'お問い合わせ内容を入力してください。',
+    contactErrCooldown: '連続送信はできません。しばらくお待ちください。',
     // Request BOX
     requestTitle: 'リクエストBOX',
     requestSub: 'ゲームへのフィードバックやリクエストを送信できます。「こういう機能が欲しい」「ここを改善してほしい」「こういうゲーム作って欲しい」など自由にどうぞ。',
@@ -810,6 +817,10 @@ const I18N = {
     requestBtn: '送信',
     requestSuccess: 'フィードバックを受け付けました。',
     requestError: '送信に失敗しました。',
+    requestErrGame: 'ゲームを選択してください。',
+    requestErrCat: 'カテゴリを選択してください。',
+    requestErrComment: 'コメントを入力してください。',
+    requestErrCooldown: '連続送信はできません。しばらくお待ちください。',
     // Community
     communityTitle: 'コミュニティ',
     discordText: 'AIに関する情報を幅広く共有するコミュニティです。AI画像生成・AI動画制作を中心に、メンバーが日々の成果やノウハウを発信しています。ゲーム開発やベータ版の先行公開も行っているので、興味のある方はぜひご参加ください。',
@@ -850,6 +861,10 @@ const I18N = {
     contactBtn: 'SEND',
     contactSuccess: 'Sent successfully. Thank you.',
     contactError: 'Failed to send.',
+    contactErrName: 'Please enter your name.',
+    contactErrEmail: 'Please enter a valid email address.',
+    contactErrMsg: 'Please enter your message.',
+    contactErrCooldown: 'Please wait before sending again.',
     // Request BOX
     requestTitle: 'REQUEST BOX',
     requestSub: 'Send feedback or requests for specific games. Feature requests, improvements, bug reports, or new game ideas — all welcome.',
@@ -860,6 +875,10 @@ const I18N = {
     requestBtn: 'SUBMIT',
     requestSuccess: 'Feedback received.',
     requestError: 'Failed to submit.',
+    requestErrGame: 'Please select a game.',
+    requestErrCat: 'Please select a category.',
+    requestErrComment: 'Please enter a comment.',
+    requestErrCooldown: 'Please wait before submitting again.',
     // Community
     communityTitle: 'COMMUNITY',
     discordText: 'A community sharing a wide range of AI-related topics — primarily AI image generation and AI video creation, with members sharing their work and insights daily. Game development updates and early beta access are also available. Feel free to join if you\'re interested.',
@@ -942,7 +961,7 @@ function GameCard({ game, onStart, lang, topGameId }) {
   const g = getGame(game, lang);
   const t = I18N[lang];
   const imgSrc = game.imageUrl && IMAGES[game.imageUrl] ? IMAGES[game.imageUrl] : null;
-  const isNew = game.category.includes('最新作');
+  const isNew = game.category.includes('最新作') && game.id !== 'LB1';
   const isTop = topGameId === game.id;
 
   return (
@@ -1102,6 +1121,12 @@ const sendWebhook = async (url, content) => {
   } catch(e) { console.warn('Webhook error:', e); }
 };
 
+// === Anti-Spam Utilities ===
+const COOLDOWN_MS = 60000;
+const lastSubmit = { contact: 0, request: 0 };
+const canSubmit = (key) => Date.now() - lastSubmit[key] > COOLDOWN_MS;
+const markSubmit = (key) => { lastSubmit[key] = Date.now(); };
+
 // === X FOLLOW Section ===
 function NotifySection({ lang }) {
   const t = I18N[lang];
@@ -1135,9 +1160,22 @@ function ContactSection({ lang, showToast }) {
   const [email, setEmail] = useState('');
   const [msg, setMsg] = useState('');
   const [sending, setSending] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [honey, setHoney] = useState('');
+
+  const validate = () => {
+    const e = {};
+    if (!name.trim()) e.name = t.contactErrName;
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) e.email = t.contactErrEmail;
+    if (!msg.trim() || msg.trim().length < 3) e.msg = t.contactErrMsg;
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const handleSubmit = async () => {
-    if (!name.trim() || !email.includes('@') || !msg.trim()) return;
+    if (honey) return;
+    if (!validate()) return;
+    if (!canSubmit('contact')) { showToast(t.contactErrCooldown); return; }
     setSending(true);
     try {
       await db.collection('inquiries').add({
@@ -1145,9 +1183,10 @@ function ContactSection({ lang, showToast }) {
         created_at: firebase.firestore.FieldValue.serverTimestamp()
       });
       sendWebhook(WEBHOOK_CONTACT, '📩 **お問い合わせ**\n名前：' + name.trim() + '\nメール：' + email.trim() + '\n内容：' + msg.trim());
+      markSubmit('contact');
       AudioService.playMagic();
       showToast(t.contactSuccess);
-      setName(''); setEmail(''); setMsg('');
+      setName(''); setEmail(''); setMsg(''); setErrors({});
     } catch(e) { showToast(t.contactError); console.warn(e); }
     setSending(false);
   };
@@ -1161,9 +1200,13 @@ function ContactSection({ lang, showToast }) {
       <div className="hud-panel-sub" style={{marginTop:'8px'}}>{t.contactSub}</div>
       {open && (
         <div className="dropdown-body">
-          <input className="hud-input" placeholder={t.contactName} value={name} onChange={e => setName(e.target.value)} />
-          <input className="hud-input" type="email" placeholder={t.contactEmail} value={email} onChange={e => setEmail(e.target.value)} />
-          <textarea className="hud-textarea" placeholder={t.contactMsg} value={msg} onChange={e => setMsg(e.target.value)} />
+          <input className="honeypot-field" type="text" value={honey} onChange={e => setHoney(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" />
+          <input className={'hud-input' + (errors.name ? ' field-error' : '')} placeholder={t.contactName} value={name} onChange={e => { setName(e.target.value); if(errors.name) setErrors(prev => ({...prev, name: ''})); }} />
+          {errors.name && <div className="field-error-msg">{errors.name}</div>}
+          <input className={'hud-input' + (errors.email ? ' field-error' : '')} type="email" placeholder={t.contactEmail} value={email} onChange={e => { setEmail(e.target.value); if(errors.email) setErrors(prev => ({...prev, email: ''})); }} />
+          {errors.email && <div className="field-error-msg">{errors.email}</div>}
+          <textarea className={'hud-textarea' + (errors.msg ? ' field-error' : '')} placeholder={t.contactMsg} value={msg} onChange={e => { setMsg(e.target.value); if(errors.msg) setErrors(prev => ({...prev, msg: ''})); }} />
+          {errors.msg && <div className="field-error-msg">{errors.msg}</div>}
           <button className="hud-submit" disabled={sending} onClick={handleSubmit}>{t.contactBtn}</button>
         </div>
       )}
@@ -1179,11 +1222,24 @@ function RequestBoxSection({ lang, showToast }) {
   const [cat, setCat] = useState('');
   const [comment, setComment] = useState('');
   const [sending, setSending] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [honey, setHoney] = useState('');
 
   const gameList = GAMES.map(g => getGame(g, lang));
 
+  const validate = () => {
+    const e = {};
+    if (!game) e.game = t.requestErrGame;
+    if (!cat) e.cat = t.requestErrCat;
+    if (!comment.trim() || comment.trim().length < 3) e.comment = t.requestErrComment;
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const handleSubmit = async () => {
-    if (!game || !cat || !comment.trim()) return;
+    if (honey) return;
+    if (!validate()) return;
+    if (!canSubmit('request')) { showToast(t.requestErrCooldown); return; }
     setSending(true);
     try {
       await db.collection('feedback').add({
@@ -1191,9 +1247,10 @@ function RequestBoxSection({ lang, showToast }) {
         created_at: firebase.firestore.FieldValue.serverTimestamp()
       });
       sendWebhook(WEBHOOK_REQUEST, '🎮 **リクエストBOX**\nゲーム：' + game + '\nカテゴリ：' + cat + '\nコメント：' + comment.trim());
+      markSubmit('request');
       AudioService.playMagic();
       showToast(t.requestSuccess);
-      setGame(''); setCat(''); setComment('');
+      setGame(''); setCat(''); setComment(''); setErrors({});
     } catch(e) { showToast(t.requestError); console.warn(e); }
     setSending(false);
   };
@@ -1207,15 +1264,19 @@ function RequestBoxSection({ lang, showToast }) {
       <div className="hud-panel-sub" style={{marginTop:'8px'}}>{t.requestSub}</div>
       {open && (
         <div className="dropdown-body">
-          <select className="hud-select" value={game} onChange={e => setGame(e.target.value)}>
+          <input className="honeypot-field" type="text" value={honey} onChange={e => setHoney(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" />
+          <select className={'hud-select' + (errors.game ? ' field-error' : '')} value={game} onChange={e => { setGame(e.target.value); if(errors.game) setErrors(prev => ({...prev, game: ''})); }}>
             <option value="">{t.requestGame}</option>
             {gameList.map((g, i) => <option key={i} value={g.name}>{g.name}</option>)}
           </select>
-          <select className="hud-select" value={cat} onChange={e => setCat(e.target.value)}>
+          {errors.game && <div className="field-error-msg">{errors.game}</div>}
+          <select className={'hud-select' + (errors.cat ? ' field-error' : '')} value={cat} onChange={e => { setCat(e.target.value); if(errors.cat) setErrors(prev => ({...prev, cat: ''})); }}>
             <option value="">{t.requestCat}</option>
             {t.requestCats.map((c, i) => <option key={i} value={c}>{c}</option>)}
           </select>
-          <textarea className="hud-textarea" placeholder={t.requestComment} value={comment} onChange={e => setComment(e.target.value)} />
+          {errors.cat && <div className="field-error-msg">{errors.cat}</div>}
+          <textarea className={'hud-textarea' + (errors.comment ? ' field-error' : '')} placeholder={t.requestComment} value={comment} onChange={e => { setComment(e.target.value); if(errors.comment) setErrors(prev => ({...prev, comment: ''})); }} />
+          {errors.comment && <div className="field-error-msg">{errors.comment}</div>}
           <button className="hud-submit" disabled={sending} onClick={handleSubmit}>{t.requestBtn}</button>
         </div>
       )}
@@ -1248,12 +1309,12 @@ function App() {
   const [activeTab, setActiveTab] = useState('人気');
   const [bootingGame, setBootingGame] = useState(null);
   const [lang, setLang] = useState('ja');
-  const [topGameId, setTopGameId] = useState(null);
+  const [topGameId, setTopGameId] = useState('FD1');
   const t = I18N[lang];
   const { show: showToast, el: toastEl } = useToast();
 
   useEffect(() => {
-    ClickTracker.getTopGame().then(id => { if (id) setTopGameId(id); });
+    // ClickTracker.getTopGame().then(id => { if (id) setTopGameId(id); });
   }, []);
 
   const filteredGames = GAMES
@@ -1277,7 +1338,7 @@ function App() {
 
   const handleGameStart = (game) => {
     setBootingGame(game);
-    setTimeout(() => { ClickTracker.getTopGame().then(id => { if (id) setTopGameId(id); }); }, 1000);
+    setTimeout(() => { /* ClickTracker.getTopGame().then(id => { if (id) setTopGameId(id); }); */ }, 1000);
   };
 
   useEffect(() => {
@@ -1315,64 +1376,3 @@ function App() {
         <div className="tabs">
           {['人気','おすすめ','最新作'].map(tab => (
             <button
-              key={tab}
-              className={'tab-btn' + (activeTab === tab ? ' active' : '')}
-              onClick={() => { AudioService.playClick(); GA.tabSwitch(tab); setActiveTab(tab); }}
-            >{t.tabs[tab]}</button>
-          ))}
-        </div>
-      </header>
-
-      {/* Game Grid */}
-      <main>
-        {filteredGames.length > 0 ? (
-          <div className="game-grid">
-            {filteredGames.map(game => (
-              <GameCard key={game.id} game={game} onStart={handleGameStart} lang={lang} topGameId={topGameId} />
-            ))}
-          </div>
-        ) : (
-          <div className="no-results">
-            <h2>{t.noResultTitle}</h2>
-            <p className="glow-text">{t.noResultMsg}</p>
-            <button className="reset-btn" onClick={() => setSearchQuery('')}>
-              {t.resetBtn}
-            </button>
-          </div>
-        )}
-      </main>
-
-      {/* Event Tools */}
-      <EventToolsSection lang={lang} />
-
-      {/* Updates / Contact / Request */}
-      <SectionDivider title={lang==='ja' ? '最新情報・お問い合わせ' : 'UPDATES / CONTACT'} />
-      <NotifySection lang={lang} />
-      <ContactSection lang={lang} showToast={showToast} />
-      <RequestBoxSection lang={lang} showToast={showToast} />
-
-      {/* Community */}
-      <CommunitySection lang={lang} />
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-nav">
-          <a href="#">HOME</a><a href="#">PROFILE</a><a href="#">SETTINGS</a><a href="#">LOGOUT</a>
-        </div>
-        <div style={{marginBottom:'4px'}}>© 202X NEO-GENESIS. ALL RIGHTS RESERVED.</div>
-        <div>VER 2.5.0-ALPHA // STABLE</div>
-      </footer>
-
-      {/* Boot Modal */}
-      {bootingGame && <BootModal game={bootingGame} onClose={() => setBootingGame(null)} lang={lang} />}
-
-      {/* Toast */}
-      {toastEl}
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-</body>
-</html>
