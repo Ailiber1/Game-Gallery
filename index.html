@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.2/babel.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
   firebase.initializeApp({
     apiKey: "AIzaSyAyWR_hWtEMOYHeJx02C1TenTegIM11K9I",
@@ -20,6 +21,7 @@
     measurementId: "G-BMB9085TJS"
   });
   const analytics = firebase.analytics();
+  const db = firebase.firestore();
 
   const GA = {
     pageView() { analytics.logEvent('page_view'); },
@@ -30,6 +32,22 @@
     langSwitch(lang) { analytics.logEvent('lang_switch', { language: lang }); },
   };
   GA.pageView();
+
+  const ClickTracker = {
+    async increment(gameId) {
+      const ref = db.collection('game_clicks').doc(gameId);
+      try {
+        await ref.set({ clicks: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+      } catch(e) { console.warn('Firestore write error:', e); }
+    },
+    async getTopGame() {
+      try {
+        const snap = await db.collection('game_clicks').orderBy('clicks', 'desc').limit(1).get();
+        if (!snap.empty) return snap.docs[0].id;
+      } catch(e) { console.warn('Firestore read error:', e); }
+      return null;
+    }
+  };
 </script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
@@ -252,6 +270,18 @@ body {
   background: rgba(0,255,65,0.15); border: 1px solid var(--green);
   padding: 2px 8px; font-size: 9px; letter-spacing: 2px;
   text-shadow: 0 0 8px var(--green);
+}
+.popular-badge {
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  background: rgba(0,0,0,0.85); border: 1px solid var(--green);
+  color: var(--green); padding: 3px 10px; font-size: 9px; letter-spacing: 2px;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700;
+  text-shadow: 0 0 8px var(--green);
+  animation: popular-glow 3s ease-in-out infinite;
+}
+@keyframes popular-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(0,255,65,0.2), inset 0 0 4px rgba(0,255,65,0.05); border-color: var(--green); }
+  50% { box-shadow: 0 0 18px rgba(0,255,65,0.5), inset 0 0 8px rgba(0,255,65,0.1); border-color: #80ffaa; }
 }
 
 /* Icon placeholder */
@@ -600,11 +630,12 @@ function getGame(game, lang) {
   return game;
 }
 
-function GameCard({ game, onStart, lang }) {
+function GameCard({ game, onStart, lang, topGameId }) {
   const g = getGame(game, lang);
   const t = I18N[lang];
   const imgSrc = game.imageUrl && IMAGES[game.imageUrl] ? IMAGES[game.imageUrl] : null;
   const isNew = game.category.includes('最新作');
+  const isTop = topGameId === game.id;
 
   return (
     <div className="game-card" onMouseEnter={() => AudioService.playHover()}>
@@ -612,6 +643,7 @@ function GameCard({ game, onStart, lang }) {
         <div className="card-thumb">
           {imgSrc ? <img src={imgSrc} alt={g.name} /> : <GameIcon type={game.iconType} />}
           <div className="overlay"></div>
+          {isTop && <div className="popular-badge">{lang==='ja' ? '▲ MOST_PLAYED' : '▲ MOST_PLAYED'}</div>}
           {isNew && <div className="new-badge glow-text">NEW_CORE</div>}
         </div>
         <div className="card-body">
@@ -625,7 +657,7 @@ function GameCard({ game, onStart, lang }) {
             <span>{t.players}: {g.players}</span>
             <span>{t.duration}: {g.playTime}</span>
           </div>
-          <button className="run-btn" onClick={() => { AudioService.playMagic(); GA.gameClick(game.id, g.name); onStart(game); }}>
+          <button className="run-btn" onClick={() => { AudioService.playMagic(); GA.gameClick(game.id, g.name); ClickTracker.increment(game.id); onStart(game); }}>
             <span>{t.runBtn}</span>
           </button>
         </div>
@@ -699,7 +731,12 @@ function App() {
   const [activeTab, setActiveTab] = useState('人気');
   const [bootingGame, setBootingGame] = useState(null);
   const [lang, setLang] = useState('ja');
+  const [topGameId, setTopGameId] = useState(null);
   const t = I18N[lang];
+
+  useEffect(() => {
+    ClickTracker.getTopGame().then(id => { if (id) setTopGameId(id); });
+  }, []);
 
   const filteredGames = GAMES
     .filter(g => {
@@ -719,6 +756,11 @@ function App() {
     .slice(0, 12);
 
   const toggleLang = (l) => { AudioService.playClick(); GA.langSwitch(l); setLang(l); };
+
+  const handleGameStart = (game) => {
+    setBootingGame(game);
+    setTimeout(() => { ClickTracker.getTopGame().then(id => { if (id) setTopGameId(id); }); }, 1000);
+  };
 
   useEffect(() => {
     if (!searchQuery) return;
@@ -768,7 +810,7 @@ function App() {
         {filteredGames.length > 0 ? (
           <div className="game-grid">
             {filteredGames.map(game => (
-              <GameCard key={game.id} game={game} onStart={setBootingGame} lang={lang} />
+              <GameCard key={game.id} game={game} onStart={handleGameStart} lang={lang} topGameId={topGameId} />
             ))}
           </div>
         ) : (
