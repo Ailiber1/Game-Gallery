@@ -786,9 +786,9 @@ const I18N = {
     duration: 'Duration',
     // Event Tools
     eventTitle: 'イベントツール',
-    tournamentName: 'トーナメント管理',
-    tournamentUse: '用途：イベント・大会運営',
-    tournamentDesc: 'リアルタイム対戦トーナメント管理アプリ。ルーレット抽選、ブラケット表示、グループステージ対応。複数デバイスから同時参加可能。',
+    tournamentName: 'ゲーム大会ツール',
+    tournamentUse: '用途：景品付きイベント・ゲーム大会',
+    tournamentDesc: '不定期開催のゲーム大会をサポートする運営ツール。ルーレット抽選・トーナメント表・グループステージに対応。参加者は複数デバイスからリアルタイムで参加可能。',
     launchBtn: '▶ ツールを起動',
     // Notify
     notifyTitle: '最新情報',
@@ -844,9 +844,9 @@ const I18N = {
     duration: 'Duration',
     // Event Tools
     eventTitle: 'EVENT TOOLS',
-    tournamentName: 'TOURNAMENT MANAGER',
-    tournamentUse: 'USE: Events & Tournaments',
-    tournamentDesc: 'Real-time tournament management app. Roulette lottery, bracket display, group stage support. Multi-device simultaneous participation.',
+    tournamentName: 'GAME EVENT TOOL',
+    tournamentUse: 'USE: Prize Events & Game Tournaments',
+    tournamentDesc: 'Event management tool for prize-giving game tournaments. Supports roulette draws, bracket displays, and group stages. Participants can join in real-time from multiple devices.',
     launchBtn: '▶ LAUNCH TOOL',
     // Notify
     notifyTitle: 'UPDATES',
@@ -908,7 +908,7 @@ const GAME_EN = {
 };
 
 const GAMES = [
-  { id:'LB1', name:'LINKED BLOCKS_', catchphrase:'つながる、連鎖する、崩れ落ちる。', description:'同じ色のブロックをつないで消すパズルゲーム。連鎖を狙え！', genre:'パズル', players:'1-3人', playTime:'5分', tags:['パズル','連鎖','ブロック','対戦','マルチ'], category:['人気','おすすめ','最新作'], iconType:'puzzle', imageUrl:'LINKED_BLOCKS_IMG', url:'https://ailiber1.github.io/LINKED_BLOCKS/' },
+  { id:'LB1', name:'LINKED BLOCKS_', catchphrase:'つながる、連鎖する、崩れ落ちる。', description:'同じ色のブロックをつないで消すパズルゲーム。連鎖を狙え！', genre:'パズル', players:'1-3人', playTime:'5分', tags:['パズル','連鎖','ブロック','対戦','マルチ'], category:['人気','おすすめ'], iconType:'puzzle', imageUrl:'LINKED_BLOCKS_IMG', url:'https://ailiber1.github.io/LINKED_BLOCKS/' },
   { id:'FD1', name:'FALL DODGE', catchphrase:'避けろ。生き残れ。勝て。', description:'空から降り注ぐ障害物を避けて生き延びるアクションゲーム。', genre:'アクション', players:'1-4人', playTime:'3分', tags:['アクション','回避','サバイバル','マルチ'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'FALL_DODGE_IMG', url:'https://ailiber1.github.io/FALL-DODGE/' },
   { id:'1', name:'大富豪', catchphrase:'革命を起こせ、頂点を掴め。', description:'定番トランプゲーム。革命や都落ちなどの特殊ルール搭載。', genre:'トランプ', players:'2-5人', playTime:'10分', tags:['トランプ','カード','革命','定番'], category:['人気','おすすめ'], iconType:'cards' },
   { id:'2', name:'花札', catchphrase:'花鳥風月、和の心を遊ぶ。', description:'日本伝統のカードゲーム。こいこいルールで勝負。', genre:'和風', players:'2人', playTime:'15分', tags:['和風','花札','伝統','こいこい'], category:['おすすめ'], iconType:'cards' },
@@ -973,8 +973,8 @@ function GameCard({ game, onStart, lang, topGameId }) {
         </div>
         {(isTop || isNew) && (
           <div className="card-badges">
-            {isTop && <div className="popular-badge">{lang==='ja' ? '▲ 人気' : '▲ MOST_PLAYED'}</div>}
-            {isNew && <div className="new-badge glow-text">{lang==='ja' ? '● 新作' : '● NEW_CORE'}</div>}
+            {isTop && <div className="popular-badge">{lang==='ja' ? '▲ 人気' : '▲ POPULAR'}</div>}
+            {isNew && <div className="new-badge glow-text">{lang==='ja' ? '● 新作' : '● NEW'}</div>}
           </div>
         )}
         <div className="card-body">
