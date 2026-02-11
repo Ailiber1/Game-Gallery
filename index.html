@@ -23,18 +23,26 @@
   const analytics = firebase.analytics();
   const db = firebase.firestore();
 
+  // Admin exclusion: visit with ?no_track once to disable analytics on this browser
+  if (new URLSearchParams(window.location.search).has('no_track')) {
+    localStorage.setItem('gg_no_track', '1');
+  }
+  const isAdmin = localStorage.getItem('gg_no_track') === '1';
+  if (isAdmin) { firebase.analytics().setAnalyticsCollectionEnabled(false); }
+
   const GA = {
-    pageView() { analytics.logEvent('page_view'); },
-    gameClick(id, name) { analytics.logEvent('game_click', { game_id: id, game_name: name }); },
-    gameExecute(id, name) { analytics.logEvent('game_execute', { game_id: id, game_name: name }); },
-    tabSwitch(tab) { analytics.logEvent('tab_switch', { tab_name: tab }); },
-    search(query) { analytics.logEvent('search', { search_term: query }); },
-    langSwitch(lang) { analytics.logEvent('lang_switch', { language: lang }); },
+    pageView() { if (!isAdmin) analytics.logEvent('page_view'); },
+    gameClick(id, name) { if (!isAdmin) analytics.logEvent('game_click', { game_id: id, game_name: name }); },
+    gameExecute(id, name) { if (!isAdmin) analytics.logEvent('game_execute', { game_id: id, game_name: name }); },
+    tabSwitch(tab) { if (!isAdmin) analytics.logEvent('tab_switch', { tab_name: tab }); },
+    search(query) { if (!isAdmin) analytics.logEvent('search', { search_term: query }); },
+    langSwitch(lang) { if (!isAdmin) analytics.logEvent('lang_switch', { language: lang }); },
   };
-  GA.pageView();
+  if (!isAdmin) GA.pageView();
 
   const ClickTracker = {
     async increment(gameId) {
+      if (isAdmin) return;
       const ref = db.collection('game_clicks').doc(gameId);
       try {
         await ref.set({ clicks: firebase.firestore.FieldValue.increment(1) }, { merge: true });
@@ -1358,11 +1366,3 @@ function App() {
 
       {/* Toast */}
       {toastEl}
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-</body>
-</html>
