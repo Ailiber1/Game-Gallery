@@ -553,31 +553,19 @@ body {
 .dropdown-panel:hover {
   transform: translateY(-6px);
   border-color: rgba(0,255,65,0.6);
-  box-shadow:
-    0 0 12px rgba(0,255,65,0.3),
-    0 0 30px rgba(0,255,65,0.15),
-    inset 0 0 15px rgba(0,255,65,0.05);
+  box-shadow: 0 0 12px rgba(0,255,65,0.3), 0 0 30px rgba(0,255,65,0.15), inset 0 0 15px rgba(0,255,65,0.05);
 }
-.dropdown-panel:hover::before {
-  opacity: 1;
-}
-.dropdown-closed {
-  cursor: pointer;
-}
+.dropdown-panel:hover::before { opacity: 1; }
+.dropdown-closed { cursor: pointer; }
 .panel-hoverable {
   transition: transform 0.4s cubic-bezier(0.165,0.84,0.44,1), box-shadow 0.4s, border-color 0.4s;
 }
 .panel-hoverable:hover {
   transform: translateY(-6px);
   border-color: rgba(0,255,65,0.6);
-  box-shadow:
-    0 0 12px rgba(0,255,65,0.3),
-    0 0 30px rgba(0,255,65,0.15),
-    inset 0 0 15px rgba(0,255,65,0.05);
+  box-shadow: 0 0 12px rgba(0,255,65,0.3), 0 0 30px rgba(0,255,65,0.15), inset 0 0 15px rgba(0,255,65,0.05);
 }
-.panel-hoverable:hover::before {
-  opacity: 1;
-}
+.panel-hoverable:hover::before { opacity: 1; }
 .dropdown-toggle {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%; background: none; border: none; cursor: pointer;
@@ -1350,7 +1338,7 @@ function App() {
   const { show: showToast, el: toastEl } = useToast();
 
   useEffect(() => {
-    // ClickTracker.getTopGame().then(id => { if (id) setTopGameId(id); });
+    // ClickTracker disabled
   }, []);
 
   const filteredGames = GAMES
@@ -1374,7 +1362,7 @@ function App() {
 
   const handleGameStart = (game) => {
     setBootingGame(game);
-    setTimeout(() => { /* ClickTracker.getTopGame().then(id => { if (id) setTopGameId(id); }); */ }, 1000);
+    setTimeout(() => { /* disabled */ }, 1000);
   };
 
   useEffect(() => {
@@ -1437,3 +1425,15 @@ function App() {
             </button>
           </div>
         )}
+      </main>
+
+      {/* Event Tools */}
+      <EventToolsSection lang={lang} />
+
+      {/* Updates / Contact / Request */}
+      <SectionDivider title={lang==='ja' ? '最新情報・お問い合わせ' : 'UPDATES / CONTACT'} />
+      <NotifySection lang={lang} />
+      <ContactSection lang={lang} showToast={showToast} />
+      <RequestBoxSection lang={lang} showToast={showToast} />
+
+      {/* Community */}
