@@ -543,7 +543,8 @@ body {
 }
 .hud-submit:hover { background: var(--green); color: #000; box-shadow: 0 0 20px rgba(0,255,65,0.4); }
 .hud-submit:disabled { opacity: 0.3; cursor: not-allowed; }
-.hud-input.field-error, .hud-textarea.field-error, .hud-select.field-error { border-color: #ff4444; box-shadow: 0 0 8px rgba(255,68,68,0.2); }
+.hud-input.field-error, .hud-textarea.field-error, .hud-select.field-error { border-color: #ff4444; box-shadow: 0 0 8px rgba(255,68,68,0.2); animation: field-shake 0.4s ease; }
+@keyframes field-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)} }
 .field-error-msg { color: #ff4444; font-size: 11px; margin: -4px 0 8px 0; font-family: var(--font); text-shadow: 0 0 6px rgba(255,68,68,0.3); }
 .honeypot-field { position: absolute; left: -9999px; opacity: 0; height: 0; width: 0; pointer-events: none; }
 
@@ -887,6 +888,8 @@ const I18N = {
     contactBtn: '送信',
     contactSuccess: '送信完了。ありがとうございます。',
     contactError: '送信に失敗しました。',
+    contactValidation: '必須項目をすべて入力してください。',
+    contactEmailInvalid: '有効なメールアドレスを入力してください。',
     // Request BOX
     requestTitle: 'リクエストBOX',
     requestSub: 'ゲームへのフィードバックやリクエストを送信できます。「こういう機能が欲しい」「ここを改善してほしい」「こういうゲーム作って欲しい」など自由にどうぞ。',
@@ -897,6 +900,7 @@ const I18N = {
     requestBtn: '送信',
     requestSuccess: 'フィードバックを受け付けました。',
     requestError: '送信に失敗しました。',
+    requestValidation: 'すべての項目を入力・選択してください。',
     // Community
     communityTitle: 'コミュニティ',
     discordText: 'AIに関する情報を幅広く共有するコミュニティです。AI画像生成・AI動画制作を中心に、メンバーが日々の成果やノウハウを発信しています。ゲーム開発やベータ版の先行公開も行っているので、興味のある方はぜひご参加ください。',
@@ -937,6 +941,8 @@ const I18N = {
     contactBtn: 'SEND',
     contactSuccess: 'Sent successfully. Thank you.',
     contactError: 'Failed to send.',
+    contactValidation: 'Please fill in all required fields.',
+    contactEmailInvalid: 'Please enter a valid email address.',
     // Request BOX
     requestTitle: 'REQUEST BOX',
     requestSub: 'Send feedback or requests for specific games. Feature requests, improvements, bug reports, or new game ideas — all welcome.',
@@ -947,6 +953,7 @@ const I18N = {
     requestBtn: 'SUBMIT',
     requestSuccess: 'Feedback received.',
     requestError: 'Failed to submit.',
+    requestValidation: 'Please fill in all fields.',
     // Community
     communityTitle: 'COMMUNITY',
     discordText: 'A community sharing a wide range of AI-related topics — primarily AI image generation and AI video creation, with members sharing their work and insights daily. Game development updates and early beta access are also available. Feel free to join if you\'re interested.',
@@ -1226,9 +1233,21 @@ function ContactSection({ lang, showToast }) {
   const [email, setEmail] = useState('');
   const [msg, setMsg] = useState('');
   const [sending, setSending] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async () => {
-    if (!name.trim() || !email.includes('@') || !msg.trim()) return;
+    const errs = {};
+    if (!name.trim()) errs.name = true;
+    if (!email.trim()) errs.email = true;
+    else if (!email.includes('@')) errs.emailInvalid = true;
+    if (!msg.trim()) errs.msg = true;
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      AudioService.playClick();
+      showToast(errs.emailInvalid ? t.contactEmailInvalid : t.contactValidation);
+      return;
+    }
+    setErrors({});
     setSending(true);
     try {
       await db.collection('inquiries').add({
@@ -1252,9 +1271,9 @@ function ContactSection({ lang, showToast }) {
       <div className="hud-panel-sub" style={{marginTop:'8px'}}>{t.contactSub}</div>
       {open && (
         <div className="dropdown-body">
-          <input className="hud-input" placeholder={t.contactName} value={name} onChange={e => setName(e.target.value)} />
-          <input className="hud-input" type="email" placeholder={t.contactEmail} value={email} onChange={e => setEmail(e.target.value)} />
-          <textarea className="hud-textarea" placeholder={t.contactMsg} value={msg} onChange={e => setMsg(e.target.value)} />
+          <input className={'hud-input' + (errors.name ? ' field-error' : '')} placeholder={t.contactName} value={name} onChange={e => { setName(e.target.value); setErrors(prev => { const n = {...prev}; delete n.name; return n; }); }} />
+          <input className={'hud-input' + (errors.email || errors.emailInvalid ? ' field-error' : '')} type="email" placeholder={t.contactEmail} value={email} onChange={e => { setEmail(e.target.value); setErrors(prev => { const n = {...prev}; delete n.email; delete n.emailInvalid; return n; }); }} />
+          <textarea className={'hud-textarea' + (errors.msg ? ' field-error' : '')} placeholder={t.contactMsg} value={msg} onChange={e => { setMsg(e.target.value); setErrors(prev => { const n = {...prev}; delete n.msg; return n; }); }} />
           <button className="hud-submit" disabled={sending} onClick={handleSubmit}>{t.contactBtn}</button>
         </div>
       )}
@@ -1270,11 +1289,22 @@ function RequestBoxSection({ lang, showToast }) {
   const [cat, setCat] = useState('');
   const [comment, setComment] = useState('');
   const [sending, setSending] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const gameList = GAMES.filter(g => g.url).map(g => getGame(g, lang));
 
   const handleSubmit = async () => {
-    if (!game || !cat || !comment.trim()) return;
+    const errs = {};
+    if (!game) errs.game = true;
+    if (!cat) errs.cat = true;
+    if (!comment.trim()) errs.comment = true;
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      AudioService.playClick();
+      showToast(t.requestValidation);
+      return;
+    }
+    setErrors({});
     setSending(true);
     try {
       await db.collection('feedback').add({
@@ -1298,15 +1328,15 @@ function RequestBoxSection({ lang, showToast }) {
       <div className="hud-panel-sub" style={{marginTop:'8px'}}>{t.requestSub}</div>
       {open && (
         <div className="dropdown-body">
-          <select className="hud-select" value={game} onChange={e => setGame(e.target.value)}>
+          <select className={'hud-select' + (errors.game ? ' field-error' : '')} value={game} onChange={e => { setGame(e.target.value); setErrors(prev => { const n = {...prev}; delete n.game; return n; }); }}>
             <option value="">{t.requestGame}</option>
             {gameList.map((g, i) => <option key={i} value={g.name}>{g.name}</option>)}
           </select>
-          <select className="hud-select" value={cat} onChange={e => setCat(e.target.value)}>
+          <select className={'hud-select' + (errors.cat ? ' field-error' : '')} value={cat} onChange={e => { setCat(e.target.value); setErrors(prev => { const n = {...prev}; delete n.cat; return n; }); }}>
             <option value="">{t.requestCat}</option>
             {t.requestCats.map((c, i) => <option key={i} value={c}>{c}</option>)}
           </select>
-          <textarea className="hud-textarea" placeholder={t.requestComment} value={comment} onChange={e => setComment(e.target.value)} />
+          <textarea className={'hud-textarea' + (errors.comment ? ' field-error' : '')} placeholder={t.requestComment} value={comment} onChange={e => { setComment(e.target.value); setErrors(prev => { const n = {...prev}; delete n.comment; return n; }); }} />
           <button className="hud-submit" disabled={sending} onClick={handleSubmit}>{t.requestBtn}</button>
         </div>
       )}
