@@ -1174,7 +1174,7 @@ function ContactSection({ lang, showToast }) {
         name: name.trim(), email: email.trim(), message: msg.trim(),
         created_at: firebase.firestore.FieldValue.serverTimestamp()
       });
-      sendWebhook(WEBHOOK_CONTACT, '📩 **お問い合わせ**\n名前：' + name.trim() + '\nメール：' + email.trim() + '\n内容：' + msg.trim());
+      sendWebhook(WEBHOOK_CONTACT, '📩 **お問い合わせ**\n名前・社名：' + name.trim() + '\nメール：' + email.trim() + '\n内容：' + msg.trim());
       AudioService.playMagic();
       showToast(t.contactSuccess);
       setName(''); setEmail(''); setMsg('');
