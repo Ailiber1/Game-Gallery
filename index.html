@@ -1235,6 +1235,8 @@ function ContactSection({ lang, showToast }) {
   const [sending, setSending] = useState(false);
   const [errors, setErrors] = useState({});
 
+  const toggleOpen = (val) => { setOpen(val); if (!val) setErrors({}); };
+
   const handleSubmit = async () => {
     const errs = {};
     if (!name.trim()) errs.name = true;
@@ -1263,8 +1265,8 @@ function ContactSection({ lang, showToast }) {
   };
 
   return (
-    <div className={'hud-panel dropdown-panel' + (!open ? ' dropdown-closed' : '')} onClick={() => { if (!open) { AudioService.playClick(); setOpen(true); } }}>
-      <button className="dropdown-toggle" onClick={(e) => { e.stopPropagation(); AudioService.playClick(); setOpen(!open); }}>
+    <div className={'hud-panel dropdown-panel' + (!open ? ' dropdown-closed' : '')} onClick={() => { if (!open) { AudioService.playClick(); toggleOpen(true); } }}>
+      <button className="dropdown-toggle" onClick={(e) => { e.stopPropagation(); AudioService.playClick(); toggleOpen(!open); }}>
         <span className="hud-panel-title" style={{marginBottom:0,paddingBottom:0,borderBottom:'none'}}>{t.contactTitle}</span>
         <span className={'dropdown-arrow' + (open ? ' open' : '')}>▼</span>
       </button>
@@ -1290,6 +1292,8 @@ function RequestBoxSection({ lang, showToast }) {
   const [comment, setComment] = useState('');
   const [sending, setSending] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const toggleOpen = (val) => { setOpen(val); if (!val) setErrors({}); };
 
   const gameList = GAMES.filter(g => g.url).map(g => getGame(g, lang));
 
@@ -1320,8 +1324,8 @@ function RequestBoxSection({ lang, showToast }) {
   };
 
   return (
-    <div className={'hud-panel dropdown-panel' + (!open ? ' dropdown-closed' : '')} onClick={() => { if (!open) { AudioService.playClick(); setOpen(true); } }}>
-      <button className="dropdown-toggle" onClick={(e) => { e.stopPropagation(); AudioService.playClick(); setOpen(!open); }}>
+    <div className={'hud-panel dropdown-panel' + (!open ? ' dropdown-closed' : '')} onClick={() => { if (!open) { AudioService.playClick(); toggleOpen(true); } }}>
+      <button className="dropdown-toggle" onClick={(e) => { e.stopPropagation(); AudioService.playClick(); toggleOpen(!open); }}>
         <span className="hud-panel-title" style={{marginBottom:0,paddingBottom:0,borderBottom:'none'}}>{t.requestTitle}</span>
         <span className={'dropdown-arrow' + (open ? ' open' : '')}>▼</span>
       </button>
