@@ -547,7 +547,37 @@ body {
 @keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
 /* Dropdown Panel */
-.dropdown-panel { }
+.dropdown-panel {
+  transition: transform 0.4s cubic-bezier(0.165,0.84,0.44,1), box-shadow 0.4s, border-color 0.4s;
+}
+.dropdown-panel:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0,255,65,0.6);
+  box-shadow:
+    0 0 12px rgba(0,255,65,0.3),
+    0 0 30px rgba(0,255,65,0.15),
+    inset 0 0 15px rgba(0,255,65,0.05);
+}
+.dropdown-panel:hover::before {
+  opacity: 1;
+}
+.dropdown-closed {
+  cursor: pointer;
+}
+.panel-hoverable {
+  transition: transform 0.4s cubic-bezier(0.165,0.84,0.44,1), box-shadow 0.4s, border-color 0.4s;
+}
+.panel-hoverable:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0,255,65,0.6);
+  box-shadow:
+    0 0 12px rgba(0,255,65,0.3),
+    0 0 30px rgba(0,255,65,0.15),
+    inset 0 0 15px rgba(0,255,65,0.05);
+}
+.panel-hoverable:hover::before {
+  opacity: 1;
+}
 .dropdown-toggle {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%; background: none; border: none; cursor: pointer;
@@ -604,6 +634,8 @@ body {
   .tab-btn { padding: 8px 14px; font-size: 12px; letter-spacing: 0.5px; flex: 1; text-align: center; }
   .game-grid { gap: 20px; }
   .game-card:hover { transform: none; }
+  .dropdown-panel:hover { transform: none; }
+  .panel-hoverable:hover { transform: none; }
   .card-body { padding: 10px; }
   .card-name { font-size: 14px; }
   .card-catch { font-size: 11px; }
@@ -640,6 +672,8 @@ body {
   .title { font-size: 1.8rem; }
   .tab-btn { padding: 8px 16px; }
   .game-card:hover { transform: translateY(-4px); }
+  .dropdown-panel:hover { transform: translateY(-3px); }
+  .panel-hoverable:hover { transform: translateY(-3px); }
   .section-title { font-size: 12px; }
   .hud-panel { padding: 20px; }
   .event-tool-icon { width: 100px; height: 100px; }
@@ -654,6 +688,8 @@ body {
 /* Touch device: disable hover scale */
 @media (hover: none) {
   .game-card:hover { transform: none; }
+  .dropdown-panel:hover { transform: none; }
+  .panel-hoverable:hover { transform: none; }
   .game-card:active { border-color: rgba(0,255,65,0.6); box-shadow: 0 0 15px rgba(0,255,65,0.3); }
   .run-btn:hover::before { height: 0; }
   .run-btn:active::before { height: 100%; }
@@ -1085,7 +1121,7 @@ function EventToolsSection({ lang }) {
   return (
     <>
       <SectionDivider title={t.eventTitle} />
-      <div className="hud-panel">
+      <div className="hud-panel panel-hoverable">
         <div className="event-tool">
           <div className="event-tool-icon">
             <svg width="60" height="60" viewBox="0 0 60 60">
@@ -1131,7 +1167,7 @@ const markSubmit = (key) => { lastSubmit[key] = Date.now(); };
 function NotifySection({ lang }) {
   const t = I18N[lang];
   return (
-    <div className="hud-panel">
+    <div className="hud-panel panel-hoverable">
       <div className="hud-panel-title">{t.notifyTitle}</div>
       <div className="hud-panel-sub">{t.notifySub}</div>
       <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
@@ -1192,8 +1228,8 @@ function ContactSection({ lang, showToast }) {
   };
 
   return (
-    <div className="hud-panel dropdown-panel">
-      <button className="dropdown-toggle" onClick={() => { AudioService.playClick(); setOpen(!open); }}>
+    <div className={'hud-panel dropdown-panel' + (!open ? ' dropdown-closed' : '')} onClick={() => { if (!open) { AudioService.playClick(); setOpen(true); } }}>
+      <button className="dropdown-toggle" onClick={(e) => { e.stopPropagation(); AudioService.playClick(); setOpen(!open); }}>
         <span className="hud-panel-title" style={{marginBottom:0,paddingBottom:0,borderBottom:'none'}}>{t.contactTitle}</span>
         <span className={'dropdown-arrow' + (open ? ' open' : '')}>▼</span>
       </button>
@@ -1256,8 +1292,8 @@ function RequestBoxSection({ lang, showToast }) {
   };
 
   return (
-    <div className="hud-panel dropdown-panel">
-      <button className="dropdown-toggle" onClick={() => { AudioService.playClick(); setOpen(!open); }}>
+    <div className={'hud-panel dropdown-panel' + (!open ? ' dropdown-closed' : '')} onClick={() => { if (!open) { AudioService.playClick(); setOpen(true); } }}>
+      <button className="dropdown-toggle" onClick={(e) => { e.stopPropagation(); AudioService.playClick(); setOpen(!open); }}>
         <span className="hud-panel-title" style={{marginBottom:0,paddingBottom:0,borderBottom:'none'}}>{t.requestTitle}</span>
         <span className={'dropdown-arrow' + (open ? ' open' : '')}>▼</span>
       </button>
@@ -1290,7 +1326,7 @@ function CommunitySection({ lang }) {
   return (
     <>
       <SectionDivider title={t.communityTitle} />
-      <div className="hud-panel" style={{textAlign:'center'}}>
+      <div className="hud-panel panel-hoverable" style={{textAlign:'center'}}>
         <div className="hud-panel-sub" style={{marginBottom:'20px'}}>{t.discordText}</div>
         <a className="discord-btn" href="https://discord.com/invite/3s2nm64Phr" target="_blank" rel="noopener noreferrer"
           onClick={() => AudioService.playClick()}>
@@ -1401,39 +1437,3 @@ function App() {
             </button>
           </div>
         )}
-      </main>
-
-      {/* Event Tools */}
-      <EventToolsSection lang={lang} />
-
-      {/* Updates / Contact / Request */}
-      <SectionDivider title={lang==='ja' ? '最新情報・お問い合わせ' : 'UPDATES / CONTACT'} />
-      <NotifySection lang={lang} />
-      <ContactSection lang={lang} showToast={showToast} />
-      <RequestBoxSection lang={lang} showToast={showToast} />
-
-      {/* Community */}
-      <CommunitySection lang={lang} />
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-nav">
-          <a href="#">HOME</a><a href="#">PROFILE</a><a href="#">SETTINGS</a><a href="#">LOGOUT</a>
-        </div>
-        <div style={{marginBottom:'4px'}}>© 202X NEO-GENESIS. ALL RIGHTS RESERVED.</div>
-        <div>VER 2.5.0-ALPHA // STABLE</div>
-      </footer>
-
-      {/* Boot Modal */}
-      {bootingGame && <BootModal game={bootingGame} onClose={() => setBootingGame(null)} lang={lang} />}
-
-      {/* Toast */}
-      {toastEl}
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-</body>
-</html>
