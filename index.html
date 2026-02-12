@@ -827,6 +827,7 @@ const I18N = {
     contactBtn: '送信',
     contactSuccess: '送信完了。ありがとうございます。',
     contactError: '送信に失敗しました。',
+    contactErrCooldown: '連続送信はできません。しばらくお待ちください。',
     // Request BOX
     requestTitle: 'リクエストBOX',
     requestSub: 'ゲームへのフィードバックやリクエストを送信できます。「こういう機能が欲しい」「ここを改善してほしい」「こういうゲーム作って欲しい」など自由にどうぞ。',
@@ -837,6 +838,7 @@ const I18N = {
     requestBtn: '送信',
     requestSuccess: 'フィードバックを受け付けました。',
     requestError: '送信に失敗しました。',
+    requestErrCooldown: '連続送信はできません。しばらくお待ちください。',
     // Community
     communityTitle: 'コミュニティ',
     discordText: 'AIに関する情報を幅広く共有するコミュニティです。AI画像生成・AI動画制作を中心に、メンバーが日々の成果やノウハウを発信しています。ゲーム開発やベータ版の先行公開も行っているので、興味のある方はぜひご参加ください。',
@@ -877,6 +879,7 @@ const I18N = {
     contactBtn: 'SEND',
     contactSuccess: 'Sent successfully. Thank you.',
     contactError: 'Failed to send.',
+    contactErrCooldown: 'Please wait before sending again.',
     // Request BOX
     requestTitle: 'REQUEST BOX',
     requestSub: 'Send feedback or requests for specific games. Feature requests, improvements, bug reports, or new game ideas — all welcome.',
@@ -887,6 +890,7 @@ const I18N = {
     requestBtn: 'SUBMIT',
     requestSuccess: 'Feedback received.',
     requestError: 'Failed to submit.',
+    requestErrCooldown: 'Please wait before submitting again.',
     // Community
     communityTitle: 'COMMUNITY',
     discordText: 'A community sharing a wide range of AI-related topics — primarily AI image generation and AI video creation, with members sharing their work and insights daily. Game development updates and early beta access are also available. Feel free to join if you\'re interested.',
@@ -1030,7 +1034,7 @@ function BootModal({ game, onClose, lang }) {
         AudioService.playMagic();
         GA.gameExecute(game.id, g.name);
         if (game.url) {
-          window.location.href = game.url;
+          game.newTab ? window.open(game.url, '_blank') : (window.location.href = game.url);
         }
         onClose();
       }, 600);
@@ -1059,7 +1063,7 @@ function BootModal({ game, onClose, lang }) {
         <div style={{fontSize:'10px',opacity:0.4,marginTop:'8px'}}>
           MEM_BLOCK: 0x{game.id}F3
         </div>
-        <button className="execute-btn" onClick={() => { AudioService.playMagic(); GA.gameExecute(game.id, g.name); if(game.url){ window.location.href = game.url; } onClose(); }}>
+        <button className="execute-btn" onClick={() => { AudioService.playMagic(); GA.gameExecute(game.id, g.name); if(game.url){ game.newTab ? window.open(game.url, '_blank') : (window.location.href = game.url); } onClose(); }}>
           {ready ? t.bootBtnReady : t.bootBtnLoading}
         </button>
       </div>
@@ -1088,8 +1092,9 @@ function SectionDivider({ title }) {
 }
 
 // === EVENT TOOLS Section ===
-function EventToolsSection({ lang }) {
+function EventToolsSection({ lang, onBoot }) {
   const t = I18N[lang];
+  const tournamentGame = { id: 'T1', name: t.tournamentName, genre: lang === 'ja' ? 'ツール' : 'Tool', url: 'https://ailiber1.github.io/Tournament-App/', newTab: true };
   return (
     <>
       <SectionDivider title={t.eventTitle} />
@@ -1106,8 +1111,8 @@ function EventToolsSection({ lang }) {
             <div className="event-tool-name">{t.tournamentName}</div>
             <div className="event-tool-use">{t.tournamentUse}</div>
             <div className="event-tool-desc">{t.tournamentDesc}</div>
-            <a className="launch-btn" href="https://ailiber1.github.io/Tournament-App/" target="_blank" rel="noopener noreferrer"
-              onClick={() => AudioService.playMagic()}>{t.launchBtn}</a>
+            <button className="launch-btn"
+              onClick={() => onBoot(tournamentGame)}>{t.launchBtn}</button>
           </div>
         </div>
       </div>
@@ -1128,6 +1133,12 @@ const sendWebhook = async (url, content) => {
     });
   } catch(e) { console.warn('Webhook error:', e); }
 };
+
+// === Anti-Spam Utilities ===
+const COOLDOWN_MS = 60000;
+const lastSubmit = { contact: 0, request: 0 };
+const canSubmit = (key) => Date.now() - lastSubmit[key] > COOLDOWN_MS;
+const markSubmit = (key) => { lastSubmit[key] = Date.now(); };
 
 // === X FOLLOW Section ===
 function NotifySection({ lang }) {
@@ -1165,6 +1176,7 @@ function ContactSection({ lang, showToast }) {
 
   const handleSubmit = async () => {
     if (!name.trim() || !email.includes('@') || !msg.trim()) return;
+    if (!canSubmit('contact')) { showToast(t.contactErrCooldown); return; }
     setSending(true);
     try {
       await db.collection('inquiries').add({
@@ -1172,6 +1184,7 @@ function ContactSection({ lang, showToast }) {
         created_at: firebase.firestore.FieldValue.serverTimestamp()
       });
       sendWebhook(WEBHOOK_CONTACT, '📩 **お問い合わせ**\n名前：' + name.trim() + '\nメール：' + email.trim() + '\n内容：' + msg.trim());
+      markSubmit('contact');
       AudioService.playMagic();
       showToast(t.contactSuccess);
       setName(''); setEmail(''); setMsg('');
@@ -1211,6 +1224,7 @@ function RequestBoxSection({ lang, showToast }) {
 
   const handleSubmit = async () => {
     if (!game || !cat || !comment.trim()) return;
+    if (!canSubmit('request')) { showToast(t.requestErrCooldown); return; }
     setSending(true);
     try {
       await db.collection('feedback').add({
@@ -1218,6 +1232,7 @@ function RequestBoxSection({ lang, showToast }) {
         created_at: firebase.firestore.FieldValue.serverTimestamp()
       });
       sendWebhook(WEBHOOK_REQUEST, '🎮 **リクエストBOX**\nゲーム：' + game + '\nカテゴリ：' + cat + '\nコメント：' + comment.trim());
+      markSubmit('request');
       AudioService.playMagic();
       showToast(t.requestSuccess);
       setGame(''); setCat(''); setComment('');
@@ -1370,7 +1385,7 @@ function App() {
       </main>
 
       {/* Event Tools */}
-      <EventToolsSection lang={lang} />
+      <EventToolsSection lang={lang} onBoot={handleGameStart} />
 
       {/* Updates / Contact / Request */}
       <SectionDivider title={lang==='ja' ? '最新情報・お問い合わせ' : 'UPDATES / CONTACT'} />
@@ -1388,18 +1403,3 @@ function App() {
         </div>
         <div style={{marginBottom:'4px'}}>© 202X NEO-GENESIS. ALL RIGHTS RESERVED.</div>
         <div>VER 2.5.0-ALPHA // STABLE</div>
-      </footer>
-
-      {/* Boot Modal */}
-      {bootingGame && <BootModal game={bootingGame} onClose={() => setBootingGame(null)} lang={lang} />}
-
-      {/* Toast */}
-      {toastEl}
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-</body>
-</html>
