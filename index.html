@@ -982,7 +982,7 @@ const GAME_EN = {
   'FD1': { name:'FALL DODGE', catchphrase:'Dodge. Survive. Win.', description:'An action game where you dodge obstacles falling from the sky.', genre:'Action', tags:['Action','Dodge','Survival','Multi'], players:'1-4P', playTime:'3min' },
   '1': { name:'MAZE HUNT', catchphrase:'Tag. Run. Survive.', description:'A 3D maze survival action game. Supports up to 4-player multiplayer.', genre:'Action', tags:['3D','Maze','Survival','Multi','Action'], players:'1-4P', playTime:'10min' },
   '2': { name:'Hanafuda', catchphrase:'Beauty of nature, play the Japanese way.', description:'Traditional Japanese card game. Compete with Koi-Koi rules.', genre:'Japanese', tags:['Japanese','Hanafuda','Traditional','Koi-Koi'], players:'2P', playTime:'15min' },
-  '3': { name:'Shogi', catchphrase:'Put your soul into every move.', description:'Traditional Japanese strategy game. Captured pieces can be reused.', genre:'Japanese', tags:['Japanese','Shogi','Strategy','Brain'], players:'2P', playTime:'20min' },
+  '3': { name:'???', catchphrase:'Put your soul into every move.', description:'Traditional Japanese strategy game. Captured pieces can be reused.', genre:'Japanese', tags:['Japanese','Shogi','Strategy','Brain'], players:'2P', playTime:'20min' },
   '4': { name:'Othello', catchphrase:'Control shifts in an instant.', description:'Simple rules with deep strategy. Black and white reversals.', genre:'Classic', tags:['Classic','Board','Reversal','Strategy'], players:'2P', playTime:'5min' },
   '5': { name:'Sudoku', catchphrase:'Solve the labyrinth of logic with numbers.', description:'Fill the 9x9 grid with numbers in this logic puzzle.', genre:'Puzzle', tags:['Puzzle','Numbers','Logic','Brain'], players:'1P', playTime:'15min' },
   '6': { name:'Snake', catchphrase:'Eat. Grow. Dodge the walls.', description:'Classic snake game. Full of retro vibes.', genre:'Retro', tags:['Retro','Arcade','Classic'], players:'1P', playTime:'3min' },
@@ -1003,7 +1003,7 @@ const GAMES = [
   { id:'FD1', name:'FALL DODGE', catchphrase:'避けろ。生き残れ。勝て。', description:'空から降り注ぐ障害物を避けて生き延びるアクションゲーム。', genre:'アクション', players:'1-4人', playTime:'3分', tags:['アクション','回避','サバイバル','マルチ'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'FALL_DODGE_IMG', url:'https://ailiber1.github.io/FALL-DODGE/' },
   { id:'1', name:'MAZE HUNT', catchphrase:'逃げろ。走れ。生き残れ。', description:'3D迷路を駆け抜けるサバイバルアクション。最大4人マルチプレイ対応。', genre:'アクション', players:'1-4人', playTime:'10分', tags:['3D','迷路','サバイバル','マルチ','アクション'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'MAZE_HUNT_IMG', url:'https://ailiber1.github.io/MAZE-HUNT/' },
   { id:'2', name:'花札', catchphrase:'花鳥風月、和の心を遊ぶ。', description:'日本伝統のカードゲーム。こいこいルールで勝負。', genre:'和風', players:'2人', playTime:'15分', tags:['和風','花札','伝統','こいこい'], category:['おすすめ'], iconType:'cards' },
-  { id:'3', name:'将棋', catchphrase:'一手に込めろ、勝利への道筋。', description:'日本伝統の頭脳ゲーム。取った駒を再利用できる奥深さ。', genre:'和風', players:'2人', playTime:'20分', tags:['和風','将棋','戦略','頭脳'], category:['人気'], iconType:'board' },
+  { id:'3', name:'???', catchphrase:'一手に込めろ、勝利への道筋。', description:'日本伝統の頭脳ゲーム。取った駒を再利用できる奥深さ。', genre:'和風', players:'2人', playTime:'20分', tags:['和風','将棋','戦略','頭脳'], category:['人気'], iconType:'board' },
   { id:'4', name:'オセロ', catchphrase:'一瞬で変わる、盤上の支配権。', description:'シンプルなルールで奥深い戦略性。黒と白の逆転劇。', genre:'定番', players:'2人', playTime:'5分', tags:['定番','ボード','逆転','戦略'], category:['人気','最新作'], iconType:'board' },
   { id:'5', name:'数独', catchphrase:'論理の迷宮を、数字で解き明かせ。', description:'9×9のマスを数字で埋めるロジックパズル。', genre:'パズル', players:'1人', playTime:'15分', tags:['パズル','数字','ロジック','脳トレ'], category:['おすすめ','最新作'], iconType:'puzzle' },
   { id:'6', name:'スネーク', catchphrase:'食べて伸びて、壁を避けろ。', description:'懐かしのスネークゲーム。リトロ感満載。', genre:'レトロ', players:'1人', playTime:'3分', tags:['レトロ','アーケード','懐かしい'], category:['人気'], iconType:'retro' },
@@ -1056,7 +1056,7 @@ function GameCard({ game, onStart, lang, topGameId }) {
   const isNew = game.id === '1';
   const isTop = topGameId === game.id;
   const isSample = game.id !== 'LB1' && game.id !== 'FD1' && game.id !== '1';
-  const isDev = false;
+  const isDev = game.id === '3';
   const hint = null;
 
   return (
