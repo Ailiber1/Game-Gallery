@@ -1053,7 +1053,7 @@ function GameCard({ game, onStart, lang, topGameId }) {
   const g = getGame(game, lang);
   const t = I18N[lang];
   const imgSrc = game.imageUrl && IMAGES[game.imageUrl] ? IMAGES[game.imageUrl] : null;
-  const isNew = game.id === 'FD1' || game.id === '1';
+  const isNew = game.id === '1';
   const isTop = topGameId === game.id;
   const isSample = game.id !== 'LB1' && game.id !== 'FD1' && game.id !== '1';
   const isDev = false;
