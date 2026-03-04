@@ -871,7 +871,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 const I18N = {
   ja: {
     searchPlaceholder: 'ゲームを検索（例：トランプ、ボード）...',
-    tabs: { '人気': '人気', 'おすすめ': 'おすすめ', '最新作': '最新作' },
+    tabs: { 'ALL': 'ALL', '人気': '人気', 'おすすめ': 'おすすめ', '最新作': '最新作' },
     noResultTitle: 'ERROR 404: NO_DATA_FOUND',
     noResultMsg: '該当するゲームユニットが見つかりません。',
     resetBtn: 'システムリセット',
@@ -924,7 +924,7 @@ const I18N = {
   },
   en: {
     searchPlaceholder: 'Search games (e.g. cards, board)...',
-    tabs: { '人気': 'POPULAR', 'おすすめ': 'RECOMMEND', '最新作': 'NEW' },
+    tabs: { 'ALL': 'ALL', '人気': 'POPULAR', 'おすすめ': 'RECOMMEND', '最新作': 'NEW' },
     noResultTitle: 'ERROR 404: NO_DATA_FOUND',
     noResultMsg: 'No matching game units found in database.',
     resetBtn: 'SYSTEM RESET',
@@ -981,42 +981,16 @@ const GAME_EN = {
   'LB1': { name:'LINKED BLOCKS_', catchphrase:'Connect. Chain. Collapse.', description:'A puzzle game where you connect same-colored blocks to clear them. Aim for chain combos!', genre:'Puzzle', tags:['Puzzle','Chain','Block','VS','Multi'], players:'1-3P', playTime:'5min' },
   'FD1': { name:'FALL DODGE', catchphrase:'Dodge. Survive. Win.', description:'An action game where you dodge obstacles falling from the sky.', genre:'Action', tags:['Action','Dodge','Survival','Multi'], players:'1-4P', playTime:'3min' },
   '1': { name:'MAZE HUNT', catchphrase:'Tag. Run. Survive.', description:'A 3D maze survival action game. Supports up to 4-player multiplayer.', genre:'Action', tags:['3D','Maze','Survival','Multi','Action'], players:'1-4P', playTime:'10min' },
-  '2': { name:'Hanafuda', catchphrase:'Beauty of nature, play the Japanese way.', description:'Traditional Japanese card game. Compete with Koi-Koi rules.', genre:'Japanese', tags:['Japanese','Hanafuda','Traditional','Koi-Koi'], players:'2P', playTime:'15min' },
-  '3': { name:'???', catchphrase:'???', description:'Traditional Japanese strategy game. Captured pieces can be reused.', genre:'Japanese', tags:['???','???','???','???'], players:'2P', playTime:'20min' },
-  '4': { name:'Othello', catchphrase:'Control shifts in an instant.', description:'Simple rules with deep strategy. Black and white reversals.', genre:'Classic', tags:['Classic','Board','Reversal','Strategy'], players:'2P', playTime:'5min' },
-  '5': { name:'Sudoku', catchphrase:'Solve the labyrinth of logic with numbers.', description:'Fill the 9x9 grid with numbers in this logic puzzle.', genre:'Puzzle', tags:['Puzzle','Numbers','Logic','Brain'], players:'1P', playTime:'15min' },
-  '6': { name:'Snake', catchphrase:'Eat. Grow. Dodge the walls.', description:'Classic snake game. Full of retro vibes.', genre:'Retro', tags:['Retro','Arcade','Classic'], players:'1P', playTime:'3min' },
-  '7': { name:'2048', catchphrase:'Stack numbers, reach the summit.', description:'Slide and merge matching numbers. Aim for 2048.', genre:'Puzzle', tags:['Puzzle','Numbers','Slide','Addictive'], players:'1P', playTime:'10min' },
-  '8': { name:'Typing', catchphrase:'Speed of your fingers decides the winner.', description:'A skill game competing in typing speed and accuracy.', genre:'Skill', tags:['Skill','Typing','Speed','Practice'], players:'1P', playTime:'2min' },
-  '9': { name:'Memory Match', catchphrase:'Memory is your ultimate weapon.', description:'Flip cards and find matching pairs.', genre:'Cards', tags:['Cards','Memory','Focus'], players:'1-4P', playTime:'5min' },
-  '10': { name:'Chess', catchphrase:'Guard your king, checkmate the enemy.', description:'The world\'s most beloved board game.', genre:'Brain', tags:['Brain','Chess','Strategy','World'], players:'2P', playTime:'30min' },
-  '11': { name:'Mahjong Solitaire', catchphrase:'Clear the tiles, clear your mind.', description:'Find and remove matching tile pairs from the stack.', genre:'Puzzle', tags:['Puzzle','Mahjong','Solitaire','Relax'], players:'1P', playTime:'10min' },
-  '12': { name:'Tetris-Style', catchphrase:'Falling blocks, stacking satisfaction.', description:'Rotate and place falling blocks to clear lines.', genre:'Retro', tags:['Retro','Block','Falling','Classic'], players:'1P', playTime:'5min' },
-  '13': { name:'Reversi', catchphrase:'Flip the game around.', description:'Sandwich and flip your opponent\'s pieces.', genre:'Classic', tags:['Classic','Board','Flip','Strategy'], players:'2P', playTime:'5min' },
-  '14': { name:'Poker', catchphrase:'Luck and bluff — who takes the pot?', description:'The king of card games. Win with the best hand.', genre:'Trump', tags:['Trump','Poker','Bluff','Bet'], players:'2-10P', playTime:'15min' },
-  '15': { name:'Blackjack', catchphrase:'Get close to 21. Don\'t go over.', description:'A battle of wits against the dealer. Aim for 21.', genre:'Trump', tags:['Trump','21','Casino'], players:'1-7P', playTime:'3min' },
-  '16': { name:'Maze', catchphrase:'Find the exit. There is always a way.', description:'Navigate randomly generated mazes.', genre:'Puzzle', tags:['Puzzle','Maze','Explore','Random'], players:'1P', playTime:'5min' },
+  '3': { name:'???', catchphrase:'???', description:'???', genre:'???', tags:['???'], players:'???', playTime:'???' },
 };
 
 const GAMES = [
   { id:'LB1', name:'LINKED BLOCKS_', catchphrase:'つながる、連鎖する、崩れ落ちる。', description:'同じ色のブロックをつないで消すパズルゲーム。連鎖を狙え！', genre:'パズル', players:'1-3人', playTime:'5分', tags:['パズル','連鎖','ブロック','対戦','マルチ'], category:['人気','おすすめ'], iconType:'puzzle', imageUrl:'LINKED_BLOCKS_IMG', url:'https://ailiber1.github.io/LINKED_BLOCKS/' },
   { id:'FD1', name:'FALL DODGE', catchphrase:'避けろ。生き残れ。勝て。', description:'空から降り注ぐ障害物を避けて生き延びるアクションゲーム。', genre:'アクション', players:'1-4人', playTime:'3分', tags:['アクション','回避','サバイバル','マルチ'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'FALL_DODGE_IMG', url:'https://ailiber1.github.io/FALL-DODGE/' },
   { id:'1', name:'MAZE HUNT', catchphrase:'逃げろ。走れ。生き残れ。', description:'3D迷路を駆け抜けるサバイバルアクション。最大4人マルチプレイ対応。', genre:'アクション', players:'1-4人', playTime:'10分', tags:['3D','迷路','サバイバル','マルチ','アクション'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'MAZE_HUNT_IMG', url:'https://ailiber1.github.io/MAZE-HUNT/' },
-  { id:'2', name:'花札', catchphrase:'花鳥風月、和の心を遊ぶ。', description:'日本伝統のカードゲーム。こいこいルールで勝負。', genre:'和風', players:'2人', playTime:'15分', tags:['和風','花札','伝統','こいこい'], category:['おすすめ'], iconType:'cards' },
-  { id:'3', name:'???', catchphrase:'???', description:'日本伝統の頭脳ゲーム。取った駒を再利用できる奥深さ。', genre:'和風', players:'2人', playTime:'20分', tags:['???','???','???','???'], category:['人気'], iconType:'board', imageUrl:'UNDER_DEV_IMG' },
-  { id:'4', name:'オセロ', catchphrase:'一瞬で変わる、盤上の支配権。', description:'シンプルなルールで奥深い戦略性。黒と白の逆転劇。', genre:'定番', players:'2人', playTime:'5分', tags:['定番','ボード','逆転','戦略'], category:['人気','最新作'], iconType:'board' },
-  { id:'5', name:'数独', catchphrase:'論理の迷宮を、数字で解き明かせ。', description:'9×9のマスを数字で埋めるロジックパズル。', genre:'パズル', players:'1人', playTime:'15分', tags:['パズル','数字','ロジック','脳トレ'], category:['おすすめ','最新作'], iconType:'puzzle' },
-  { id:'6', name:'スネーク', catchphrase:'食べて伸びて、壁を避けろ。', description:'懐かしのスネークゲーム。リトロ感満載。', genre:'レトロ', players:'1人', playTime:'3分', tags:['レトロ','アーケード','懐かしい'], category:['人気'], iconType:'retro' },
-  { id:'7', name:'2048', catchphrase:'数字を重ねて、頂点を目指せ。', description:'同じ数字をスライドして合体。2048を目指せ。', genre:'パズル', players:'1人', playTime:'10分', tags:['パズル','数字','スライド','中毒性'], category:['人気'], iconType:'puzzle' },
-  { id:'8', name:'タイピング', catchphrase:'指先の速さが、勝敗を決める。', description:'タイピング速度と正確さを競うスキルゲーム。', genre:'スキル', players:'1人', playTime:'2分', tags:['スキル','タイピング','速度','練習'], category:['最新作'], iconType:'skill' },
-  { id:'9', name:'神経衰弱', catchphrase:'記憶力こそ、最強の武器。', description:'カードをめくってペアを探す記憶ゲーム。', genre:'カード', players:'1-4人', playTime:'5分', tags:['カード','記憶','集中力'], category:['おすすめ'], iconType:'cards' },
-  { id:'10', name:'チェス', catchphrase:'王を守れ、敵を詰めろ。', description:'世界で最も愛されるボードゲーム。', genre:'頭脳戦', players:'2人', playTime:'30分', tags:['頭脳戦','チェス','戦略','世界'], category:['人気'], iconType:'board' },
-  { id:'11', name:'麻雀ソリティア', catchphrase:'牌を崩して、心を整える。', description:'積まれた牌のペアを見つけて消すパズル。', genre:'パズル', players:'1人', playTime:'10分', tags:['パズル','麻雀','ソリティア','リラックス'], category:['おすすめ'], iconType:'puzzle' },
-  { id:'12', name:'テトリス風', catchphrase:'落ちてくるブロック、積み上げる快感。', description:'落下ブロックを回転・配置してラインを消す。', genre:'レトロ', players:'1人', playTime:'5分', tags:['レトロ','ブロック','落下','定番'], category:['最新作'], iconType:'retro' },
-  { id:'13', name:'リバーシ', catchphrase:'裏返せ、戦局を。', description:'相手の石を挟んでひっくり返す戦略ゲーム。', genre:'定番', players:'2人', playTime:'5分', tags:['定番','ボード','裏返し','戦略'], category:['おすすめ'], iconType:'board' },
-  { id:'14', name:'ポーカー', catchphrase:'運と駆け引き、勝者は誰だ。', description:'ハンドの強さで勝負するカードゲームの王様。', genre:'トランプ', players:'2-10人', playTime:'15分', tags:['トランプ','ポーカー','駆け引き','ブラフ'], category:['人気'], iconType:'cards' },
-  { id:'15', name:'ブラックジャック', catchphrase:'21に近づけ、超えるな。', description:'ディーラーとの駆け引き。21を目指せ。', genre:'トランプ', players:'1-7人', playTime:'3分', tags:['トランプ','21','カジノ'], category:['最新作'], iconType:'cards' },
-  { id:'16', name:'迷路', catchphrase:'出口を見つけ出せ、道はある。', description:'ランダム生成の迷路を攻略するパズル。', genre:'パズル', players:'1人', playTime:'5分', tags:['パズル','迷路','探索','ランダム'], category:['最新作'], iconType:'puzzle' },
+  { id:'3', name:'???', catchphrase:'???', description:'???', genre:'???', players:'???', playTime:'???', tags:['???'], category:['人気'], iconType:'board', imageUrl:'UNDER_DEV_IMG' },
+  // ── 新しいゲームを追加するにはここにオブジェクトを追加 ──
+  // 例: { id:'NEW1', name:'ゲーム名', catchphrase:'キャッチコピー', description:'説明', genre:'ジャンル', players:'1-4人', playTime:'10分', tags:['タグ1','タグ2'], category:['人気'], iconType:'action', imageUrl:'IMAGE_KEY', url:'https://...' },
 ];
 
 const IMAGES = {
@@ -1391,7 +1365,7 @@ function CommunitySection({ lang }) {
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('人気');
+  const [activeTab, setActiveTab] = useState('ALL');
   const [bootingGame, setBootingGame] = useState(null);
   const [lang, setLang] = useState('ja');
   const [topGameId, setTopGameId] = useState('FD1');
@@ -1412,12 +1386,13 @@ function App() {
         lg.genre.toLowerCase().includes(q) ||
         lg.tags.some(tag => tag.toLowerCase().includes(q));
     })
+    .filter(g => activeTab === 'ALL' || g.category.includes(activeTab))
     .sort((a, b) => {
+      if (activeTab === 'ALL') return 0;
       const aHas = a.category.includes(activeTab) ? 0 : 1;
       const bHas = b.category.includes(activeTab) ? 0 : 1;
       return aHas - bHas;
-    })
-    .slice(0, 12);
+    });
 
   const toggleLang = (l) => { AudioService.playClick(); GA.langSwitch(l); setLang(l); };
 
@@ -1459,7 +1434,7 @@ function App() {
           />
         </div>
         <div className="tabs">
-          {['人気','おすすめ','最新作'].map(tab => (
+          {['ALL','人気','おすすめ','最新作'].map(tab => (
             <button
               key={tab}
               className={'tab-btn' + (activeTab === tab ? ' active' : '')}
