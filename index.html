@@ -1388,6 +1388,11 @@ function App() {
     })
     .filter(g => activeTab === 'ALL' || g.category.includes(activeTab))
     .sort((a, b) => {
+      // 公開済み(urlあり)を上、制作中(urlなし)を下に自動ソート
+      const aPublished = a.url ? 0 : 1;
+      const bPublished = b.url ? 0 : 1;
+      if (aPublished !== bPublished) return aPublished - bPublished;
+      // 同じ公開状態内ではカテゴリタブで優先ソート
       if (activeTab === 'ALL') return 0;
       const aHas = a.category.includes(activeTab) ? 0 : 1;
       const bHas = b.category.includes(activeTab) ? 0 : 1;
