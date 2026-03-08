@@ -1041,11 +1041,13 @@ function GameCard({ game, onStart, lang, topGameId }) {
           <div className="overlay"></div>
         </div>
         <div className="card-body">
-          <div className="card-name-row" style={{display:'flex',alignItems:'center',gap:'6px',flexWrap:'wrap'}}>
+          <div className="card-name-row" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'6px'}}>
             <div className="card-name" style={{marginBottom:0}}>{g.name}</div>
-            {isTop && <div className="popular-badge" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'▲ ' + (lang==='ja' ? '人気' : 'POPULAR')}</div>}
-            {isNew && <div className="new-badge glow-text" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'● ' + (lang==='ja' ? '新作' : 'NEW')}</div>}
-            {isDev && <div className="dev-badge" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'◆ ' + (lang==='ja' ? '製作中' : 'IN DEV')}</div>}
+            <div style={{display:'flex',gap:'4px',flexShrink:0}}>
+              {isTop && <div className="popular-badge" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'▲ ' + (lang==='ja' ? '人気' : 'POPULAR')}</div>}
+              {isNew && <div className="new-badge glow-text" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'● ' + (lang==='ja' ? '新作' : 'NEW')}</div>}
+              {isDev && <div className="dev-badge" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'◆ ' + (lang==='ja' ? '製作中' : 'IN DEV')}</div>}
+            </div>
           </div>
           <div className="card-id">ID: {game.id} // {g.genre}</div>
           <div className="card-catch">{g.catchphrase}</div>
