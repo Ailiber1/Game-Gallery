@@ -1040,16 +1040,13 @@ function GameCard({ game, onStart, lang, topGameId }) {
           {imgSrc ? <img src={imgSrc} alt={g.name} /> : <GameIcon type={game.iconType} />}
           <div className="overlay"></div>
         </div>
-        {(isTop || isNew || isDev || hint) && (
-          <div className="card-badges">
-            {isTop && <div className="popular-badge">{lang==='ja' ? '▲ 人気' : '▲ POPULAR'}</div>}
-            {isNew && <div className="new-badge glow-text">{lang==='ja' ? '● 新作' : '● NEW'}</div>}
-            {isDev && <div className="dev-badge">{lang==='ja' ? '◆ 製作中' : '◆ IN DEV'}</div>}
-            {hint && <div className="sample-hint-badge">{'▶ ' + hint}</div>}
-          </div>
-        )}
         <div className="card-body">
-          <div className="card-name">{g.name}</div>
+          <div className="card-name-row" style={{display:'flex',alignItems:'center',gap:'6px',flexWrap:'wrap'}}>
+            <div className="card-name" style={{marginBottom:0}}>{g.name}</div>
+            {isTop && <div className="popular-badge" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'▲ ' + (lang==='ja' ? '人気' : 'POPULAR')}</div>}
+            {isNew && <div className="new-badge glow-text" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'● ' + (lang==='ja' ? '新作' : 'NEW')}</div>}
+            {isDev && <div className="dev-badge" style={{position:'static',fontSize:'10px',padding:'2px 6px'}}>{'◆ ' + (lang==='ja' ? '製作中' : 'IN DEV')}</div>}
+          </div>
           <div className="card-id">ID: {game.id} // {g.genre}</div>
           <div className="card-catch">{g.catchphrase}</div>
           <div className="card-tags">
