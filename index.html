@@ -1028,9 +1028,9 @@ function GameCard({ game, onStart, lang, topGameId }) {
   const g = getGame(game, lang);
   const t = I18N[lang];
   const imgSrc = game.imageUrl && IMAGES[game.imageUrl] ? IMAGES[game.imageUrl] : null;
-  const isNew = game.id === '1';
+  const isNew = game.id === '3';
   const isTop = topGameId === game.id;
-  const isDev = game.id !== 'LB1' && game.id !== 'FD1' && game.id !== '1';
+  const isDev = game.id !== 'LB1' && game.id !== 'FD1' && game.id !== '1' && game.id !== '3';
   const hint = null;
 
   return (
