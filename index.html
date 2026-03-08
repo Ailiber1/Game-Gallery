@@ -346,7 +346,7 @@ body {
   border-left: 2px solid var(--green); padding-left: 8px;
   margin-bottom: 10px; line-height: 1.5;
 }
-.card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.card-tags { display: flex; flex-wrap: nowrap; gap: 4px; margin-bottom: 10px; overflow: hidden; }
 .tag {
   font-size: 10px; border: 1px solid var(--green-30);
   padding: 1px 6px; border-radius: 10px; opacity: 0.7;
@@ -981,14 +981,14 @@ const GAME_EN = {
   'LB1': { name:'LINKED BLOCKS_', catchphrase:'Connect. Chain. Collapse.', description:'A puzzle game where you connect same-colored blocks to clear them. Aim for chain combos!', genre:'Puzzle', tags:['Puzzle','Chain','Block','VS','Multi'], players:'1-3P', playTime:'5min' },
   'FD1': { name:'FALL DODGE', catchphrase:'Dodge. Survive. Win.', description:'An action game where you dodge obstacles falling from the sky.', genre:'Action', tags:['Action','Dodge','Survival','Multi'], players:'1-4P', playTime:'3min' },
   '1': { name:'MAZE HUNT', catchphrase:'Tag. Run. Survive.', description:'A 3D maze survival action game. Supports up to 4-player multiplayer.', genre:'Action', tags:['3D','Maze','Survival','Multi','Action'], players:'1-4P', playTime:'10min' },
-  '3': { name:'KANKERI', catchphrase:'Kick. Save. Survive.', description:'A 3D can-kicking survival game. Hide, seek, and kick the can!', genre:'Action', tags:['3D','Action','Survival','Multi','Hide&Seek'], players:'1-6P', playTime:'10min' },
+  '3': { name:'KANKERI', catchphrase:'Kick. Save. Survive.', description:'A 3D can-kicking survival game. Hide, seek, and kick the can!', genre:'Action', tags:['3D','Action','Survival','Multi'], players:'1-4P', playTime:'10min' },
 };
 
 const GAMES = [
   { id:'LB1', name:'LINKED BLOCKS_', catchphrase:'つながる、連鎖する、崩れ落ちる。', description:'同じ色のブロックをつないで消すパズルゲーム。連鎖を狙え！', genre:'パズル', players:'1-3人', playTime:'5分', tags:['パズル','連鎖','ブロック','対戦','マルチ'], category:['人気','おすすめ'], iconType:'puzzle', imageUrl:'LINKED_BLOCKS_IMG', url:'https://ailiber1.github.io/LINKED_BLOCKS/' },
   { id:'FD1', name:'FALL DODGE', catchphrase:'避けろ。生き残れ。勝て。', description:'空から降り注ぐ障害物を避けて生き延びるアクションゲーム。', genre:'アクション', players:'1-4人', playTime:'3分', tags:['アクション','回避','サバイバル','マルチ'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'FALL_DODGE_IMG', url:'https://ailiber1.github.io/FALL-DODGE/' },
   { id:'1', name:'MAZE HUNT', catchphrase:'逃げろ。走れ。生き残れ。', description:'3D迷路を駆け抜けるサバイバルアクション。最大4人マルチプレイ対応。', genre:'アクション', players:'1-4人', playTime:'10分', tags:['3D','迷路','サバイバル','マルチ','アクション'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'MAZE_HUNT_IMG', url:'https://ailiber1.github.io/MAZE-HUNT/' },
-  { id:'3', name:'KANKERI', catchphrase:'蹴れ。逃げろ。救い出せ。', description:'3D缶蹴りサバイバルゲーム。隠れて、見つけて、缶を蹴れ！最大6人マルチプレイ対応。', genre:'アクション', players:'1-6人', playTime:'10分', tags:['3D','アクション','サバイバル','マルチ','かくれんぼ','缶蹴り'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'KANKERI_IMG', url:'https://ailiber1.github.io/KANKERI/' },
+  { id:'3', name:'KANKERI', catchphrase:'蹴れ。逃げろ。救い出せ。', description:'3D缶蹴りサバイバルゲーム。隠れて、見つけて、缶を蹴れ！最大4人マルチプレイ対応。', genre:'アクション', players:'1-4人', playTime:'10分', tags:['3D','アクション','サバイバル','マルチ'], category:['人気','おすすめ','最新作'], iconType:'action', imageUrl:'KANKERI_IMG', url:'https://ailiber1.github.io/KANKERI/' },
   // ── 新しいゲームを追加するにはここにオブジェクトを追加 ──
   // 例: { id:'NEW1', name:'ゲーム名', catchphrase:'キャッチコピー', description:'説明', genre:'ジャンル', players:'1-4人', playTime:'10分', tags:['タグ1','タグ2'], category:['人気'], iconType:'action', imageUrl:'IMAGE_KEY', url:'https://...' },
 ];
