@@ -7,6 +7,36 @@ service cloud.firestore {
       allow write: if request.resource.data.keys().hasOnly(['clicks'])
                    && request.resource.data.clicks is int;
     }
+    // inquiries: 書き込みのみ許可（お問い合わせ）、読み取り不可
+    match /inquiries/{docId} {
+      allow read: if false;
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'message', 'created_at'])
+                    && request.resource.data.name is string
+                    && request.resource.data.email is string
+                    && request.resource.data.message is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.name.size() <= 100
+                    && request.resource.data.email.size() > 0
+                    && request.resource.data.email.size() <= 200
+                    && request.resource.data.message.size() > 0
+                    && request.resource.data.message.size() <= 2000;
+      allow update, delete: if false;
+    }
+    // feedback: 書き込みのみ許可（リクエストBOX）、読み取り不可
+    match /feedback/{docId} {
+      allow read: if false;
+      allow create: if request.resource.data.keys().hasOnly(['game_name', 'category', 'comment', 'created_at'])
+                    && request.resource.data.game_name is string
+                    && request.resource.data.category is string
+                    && request.resource.data.comment is string
+                    && request.resource.data.game_name.size() > 0
+                    && request.resource.data.game_name.size() <= 100
+                    && request.resource.data.category.size() > 0
+                    && request.resource.data.category.size() <= 50
+                    && request.resource.data.comment.size() > 0
+                    && request.resource.data.comment.size() <= 2000;
+      allow update, delete: if false;
+    }
     // その他のコレクションはすべて拒否
     match /{document=**} {
       allow read, write: if false;

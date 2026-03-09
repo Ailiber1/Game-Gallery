@@ -1184,9 +1184,26 @@ function EventToolsSection({ lang, onBoot }) {
 }
 
 // === NOTIFICATION Section ===
-// === Discord Webhook ===
-const WEBHOOK_CONTACT = 'https://discord.com/api/webhooks/1475717017834229926/Hx3N5Bd1IzjCj3HeELWP5rYEmsSeLlQS3LfnoVCk8Ba4SQ9ywvtGIT2_tWvuA8wUWJl7';
-const WEBHOOK_REQUEST = 'https://discord.com/api/webhooks/1475717322814656532/FFqew1sZE3_-dME3g9NlSa4Z0Mib7b-nBNJWPyfqmAZQNKafjtqSugS0Fnh9d2U5WxYo';
+// === Discord Webhook (難読化) ===
+const _wh = (a, b) => atob(a) + atob(b);
+const WEBHOOK_CONTACT = _wh(
+  'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ3NTcxNzAxNzgzNDIyOTkyNi8=',
+  'SHgzTjVCZDFJempDajNIZUVMV1A1cllFbXNTZUxsUVMzTGZub1ZDazhCYTRTUTl5d3Z0R0lUMl90V3Z1QTh3VVdKbDc='
+);
+const WEBHOOK_REQUEST = _wh(
+  'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ3NTcxNzMyMjgxNDY1NjUzMi8=',
+  'RkZxZXcxc1pFM18tZE1FM2c5TmxTYTRaME1pYjdiLW5CTkpXUHlmcW1BWlFOS2FmanRxU3VnUzBGbmg5ZDJVNVN4WW8='
+);
+// === スパム対策: レート制限 ===
+const _spamGuard = (() => {
+  const store = {};
+  return (key, cooldownMs = 30000) => {
+    const now = Date.now();
+    if (store[key] && now - store[key] < cooldownMs) return false;
+    store[key] = now;
+    return true;
+  };
+})();
 const sendWebhook = async (url, content) => {
   try {
     await fetch(url, {
@@ -1246,6 +1263,10 @@ function ContactSection({ lang, showToast }) {
       showToast(errs.emailInvalid ? t.contactEmailInvalid : t.contactValidation);
       return;
     }
+    if (!_spamGuard('contact', 30000)) {
+      showToast(lang === 'ja' ? '送信は30秒に1回までです。' : 'Please wait 30 seconds between submissions.');
+      return;
+    }
     setErrors({});
     setSending(true);
     try {
@@ -1303,6 +1324,10 @@ function RequestBoxSection({ lang, showToast }) {
       setErrors(errs);
       AudioService.playClick();
       showToast(t.requestValidation);
+      return;
+    }
+    if (!_spamGuard('request', 30000)) {
+      showToast(lang === 'ja' ? '送信は30秒に1回までです。' : 'Please wait 30 seconds between submissions.');
       return;
     }
     setErrors({});
