@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // game_clicks: 誰でも読み取り可、クリック数の増加のみ許可
+    match /game_clicks/{gameId} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['clicks'])
+                   && request.resource.data.clicks is int;
+    }
+    // その他のコレクションはすべて拒否
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
