@@ -311,15 +311,11 @@ body {
 }
 .recommend-badge {
   display: inline-block;
-  background: rgba(0,0,0,0.85); border: 1px solid #ff8c00;
-  color: #ff8c00; padding: 2px 8px; font-size: 9px; letter-spacing: 2px;
+  background: rgba(0,0,0,0.85); border: 1px solid var(--green);
+  color: var(--green); padding: 2px 8px; font-size: 9px; letter-spacing: 2px;
   font-family: 'JetBrains Mono', monospace; font-weight: 700;
-  text-shadow: 0 0 8px rgba(255,140,0,0.6);
-  animation: recommend-glow 3s ease-in-out infinite;
-}
-@keyframes recommend-glow {
-  0%, 100% { box-shadow: 0 0 6px rgba(255,140,0,0.2), inset 0 0 4px rgba(255,140,0,0.05); border-color: #ff8c00; }
-  50% { box-shadow: 0 0 18px rgba(255,140,0,0.5), inset 0 0 8px rgba(255,140,0,0.1); border-color: #ffb347; }
+  text-shadow: 0 0 8px var(--green);
+  animation: popular-glow 3s ease-in-out infinite;
 }
 .card-badges {
   display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 12px 0;
